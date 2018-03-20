@@ -110,7 +110,7 @@ sum (x :. xs) = x + (sum xs)
 -- prop> \x -> sum (map (const 1) x) == length x
 length :: List a -> Int
 length Nil = 0
-length (x :. xs) = 1 + (length xs)
+length (_ :. xs) = 1 + (length xs)
 
 -- | Map the given function on each element of the list.
 --
@@ -184,22 +184,17 @@ flatten (x :. xs) = x ++ (flatten xs)
 -- prop> \x -> headOr x (flatMap id (y :. infinity :. Nil)) == headOr 0 y
 --
 -- prop> \x -> flatMap id (x :: List (List Int)) == flatten x
-flatMap ::
-  (a -> List b)
-  -> List a
-  -> List b
-flatMap =
-  error "todo: Course.List#flatMap"
+flatMap :: (a -> List b) -> List a -> List b
+flatMap _ Nil = Nil
+flatMap f xs = flatten (map f xs)
 
 -- | Flatten a list of lists to a list (again).
 -- HOWEVER, this time use the /flatMap/ function that you just wrote.
 --
 -- prop> \x -> let types = x :: List (List Int) in flatten x == flattenAgain x
-flattenAgain ::
-  List (List a)
-  -> List a
-flattenAgain =
-  error "todo: Course.List#flattenAgain"
+flattenAgain :: List (List a) -> List a
+flattenAgain Nil = Nil
+flattenAgain xs = flatMap id xs
 
 -- | Convert a list of optional values to an optional list of values.
 --
@@ -223,11 +218,11 @@ flattenAgain =
 --
 -- >>> seqOptional (Empty :. map Full infinity)
 -- Empty
-seqOptional ::
-  List (Optional a)
-  -> Optional (List a)
-seqOptional =
-  error "todo: Course.List#seqOptional"
+seqOptional :: List (Optional a) -> Optional (List a)
+seqOptional Nil = Full Nil
+seqOptional (Empty :. _) = Empty
+seqOptional (Full x :. xs) =
+  bindOptional (\ixs -> Full (x :. ixs)) $ seqOptional xs
 
 -- | Find the first element in the list matching the predicate.
 --
@@ -245,12 +240,10 @@ seqOptional =
 --
 -- >>> find (const True) infinity
 -- Full 0
-find ::
-  (a -> Bool)
-  -> List a
-  -> Optional a
-find =
-  error "todo: Course.List#find"
+find :: (a -> Bool) -> List a -> Optional a
+find _ Nil = Empty
+find pred (x :. xs) =
+  if pred x then Full x else find pred xs
 
 -- | Determine if the length of the given list is greater than 4.
 --
@@ -265,11 +258,15 @@ find =
 --
 -- >>> lengthGT4 infinity
 -- True
-lengthGT4 ::
-  List a
-  -> Bool
-lengthGT4 =
-  error "todo: Course.List#lengthGT4"
+lengthGT4 :: List a -> Bool
+lengthGT4 Nil = False
+lengthGT4 l =
+  let adder tot il =
+        if tot == 4 then
+          True
+        else case il of Nil -> False
+                        _ :. xs -> adder (tot + 1) xs
+  in adder 0 l
 
 -- | Reverse a list.
 --
