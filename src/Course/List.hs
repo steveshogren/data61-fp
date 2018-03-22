@@ -279,11 +279,9 @@ lengthGT4 l =
 -- prop> \x -> let types = x :: List Int in reverse x ++ reverse y == reverse (y ++ x)
 --
 -- prop> \x -> let types = x :: Int in reverse (x :. Nil) == x :. Nil
+
 reverse :: List a -> List a
-reverse Nil = Nil
-reverse (x :. Nil) = x :. Nil
--- reverse (x :. xs) = (reverse xs) ++ (x :. Nil)
-reverse _ = error "Not sure yet"
+reverse l = foldLeft (\ret next -> next :. ret) Nil l
 
 -- | Produce an infinite `List` that seeds with the given value at its head,
 -- then runs the given function for subsequent elements
