@@ -59,7 +59,9 @@ instance Applicative List where
   pure :: a -> List a
   pure a = a :. Nil
   (<*>) :: List (a -> b) -> List a -> List b
-  (<*>) = flatMap
+  (<*>) Nil _ = Nil
+  (<*>) (f :. Nil) as = (map f as)
+  (<*>) (f :. fs) as = (map f as) ++ (fs <*> as)
 
 -- | Insert into an Optional.
 --
@@ -74,9 +76,7 @@ instance Applicative List where
 -- >>> Full (+8) <*> Empty
 -- Empty
 instance Applicative Optional where
-  pure ::
-    a
-    -> Optional a
+  pure :: a -> Optional a
   pure =
     error "todo: Course.Applicative pure#instance Optional"
   (<*>) ::
