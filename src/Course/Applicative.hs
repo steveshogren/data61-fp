@@ -28,12 +28,8 @@ import qualified Prelude as P(fmap, return, (>>=))
 --   `∀u v w. pure (.) <*> u <*> v <*> w ≅ u <*> (v <*> w)`
 
 class Functor f => Applicative f where
-  pure ::
-    a -> f a
-  (<*>) ::
-    f (a -> b)
-    -> f a
-    -> f b
+  pure :: a -> f a
+  (<*>) :: f (a -> b) -> f a -> f b
 
 infixl 4 <*>
 
@@ -219,8 +215,7 @@ lift1 f a = pure f <*> a
 --
 -- prop> \x y -> Full x *> Full y == Full y
 (*>) :: Applicative f => f a -> f b -> f b
-(*>) =
-  error "todo: Course.Applicative#(*>)"
+(*>) a b = (\_ -> id) <$> a <*> b
 
 -- | Apply, discarding the value of the second argument.
 -- Pronounced, left apply.
@@ -240,13 +235,8 @@ lift1 f a = pure f <*> a
 -- prop> \x y z a b c -> (x :. y :. z :. Nil) <* (a :. b :. c :. Nil) == (x :. x :. x :. y :. y :. y :. z :. z :. z :. Nil)
 --
 -- prop> \x y -> Full x <* Full y == Full x
-(<*) ::
-  Applicative f =>
-  f b
-  -> f a
-  -> f b
-(<*) =
-  error "todo: Course.Applicative#(<*)"
+(<*) :: Applicative f => f b -> f a -> f b
+(<*) a b = (\_ -> id) <$> b <*> a
 
 -- | Sequences a list of structures to a structure of list.
 --
