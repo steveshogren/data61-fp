@@ -96,6 +96,15 @@ instance Applicative Optional where
 -- 15
 --
 -- prop> \x y -> pure x y == x
+-- I don't exactly understand why:
+--    λ> ((*3):.(*2):.Nil) <*> (4:.5:.Nil)
+--    [12,15,8,10]
+-- and not:
+--    λ> ((*3):.(*2):.Nil) <*> (4:.5:.Nil)
+--    [12,8,15,10]
+-- Looking up more on https://en.wikibooks.org/wiki/Haskell/Applicative_functors
+-- shows that it is because List is not "commutative". It isn't obvious
+-- which "way" it should go for an applicative functor.
 instance Applicative ((->) t) where
   pure :: a -> ((->) t a)
   pure a = (\_ -> a)
@@ -214,6 +223,9 @@ lift1 f a = pure f <*> a
 -- prop> \a b c x y z -> (a :. b :. c :. Nil) *> (x :. y :. z :. Nil) == (x :. y :. z :. x :. y :. z :. x :. y :. z :. Nil)
 --
 -- prop> \x y -> Full x *> Full y == Full y
+
+-- this takes the first argument, and performs it,
+-- then discards the result for the second
 (*>) :: Applicative f => f a -> f b -> f b
 (*>) a b = (\_ -> id) <$> a <*> b
 
@@ -236,7 +248,7 @@ lift1 f a = pure f <*> a
 --
 -- prop> \x y -> Full x <* Full y == Full x
 (<*) :: Applicative f => f b -> f a -> f b
-(<*) a b = (\_ -> id) <$> b <*> a
+(<*) b a = error "test"
 
 -- | Sequences a list of structures to a structure of list.
 --
