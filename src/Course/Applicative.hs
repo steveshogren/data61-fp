@@ -112,7 +112,6 @@ instance Applicative ((->) t) where
   (<*>) tf ta =
     (\t -> (tf t) (ta t))
 
-
 -- | Apply a binary function in the environment.
 --
 -- >>> lift2 (+) (ExactlyOne 7) (ExactlyOne 8)
@@ -224,8 +223,19 @@ lift1 f a = pure f <*> a
 --
 -- prop> \x y -> Full x *> Full y == Full y
 
--- this takes the first argument, and performs it,
--- then discards the result for the second
+-- Takes the first argument, and performs it,
+-- then discards the result for the second.
+-- The non-commutativity of Lists also makes this "odd",
+-- in that we arbitrarily choose:
+--    λ> (1 :. 2 :. Nil) *> (4 :. 5 :. 6 :. Nil)
+--    [4,5,6,4,5,6]
+-- Whereas for Empty:
+--    λ> Empty *> Full 8
+--    Empty
+--    λ> Full 8 *> Empty
+--    Empty
+-- I note that I am confused, because it isn't
+-- discarding the left Empty
 (*>) :: Applicative f => f a -> f b -> f b
 (*>) a b = (\_ -> id) <$> a <*> b
 
