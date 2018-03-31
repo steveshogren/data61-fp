@@ -235,7 +235,9 @@ lift1 f a = pure f <*> a
 --    λ> Full 8 *> Empty
 --    Empty
 -- I note that I am confused, because it isn't
--- discarding the left Empty
+-- discarding the left Empty. It makes sense when I
+-- realize that <*> is expecting a function to apply to
+-- f b, and <$> continues along the Empty, so Empty function
 (*>) :: Applicative f => f a -> f b -> f b
 (*>) a b = (\_ -> id) <$> a <*> b
 
@@ -257,8 +259,12 @@ lift1 f a = pure f <*> a
 -- prop> \x y z a b c -> (x :. y :. z :. Nil) <* (a :. b :. c :. Nil) == (x :. x :. x :. y :. y :. y :. z :. z :. z :. Nil)
 --
 -- prop> \x y -> Full x <* Full y == Full x
+
+-- this also is odd about non-commutative List,
+-- but otherwise still applies b then a, discarding the
+-- result of a
 (<*) :: Applicative f => f b -> f a -> f b
-(<*) b a = error "test"
+(<*) b a = (\ib -> (\_ -> ib)) <$> b <*> a
 
 -- | Sequences a list of structures to a structure of list.
 --
