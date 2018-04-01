@@ -282,12 +282,17 @@ lift1 f a = pure f <*> a
 --
 -- >>> sequence ((*10) :. (+2) :. Nil) 6
 -- [60,8]
-sequence ::
-  Applicative f =>
-  List (f a)
-  -> f (List a)
-sequence =
-  error "todo: Course.Applicative#sequence"
+
+-- Thinking about sequence as "two" different monads
+-- made the result pop out: first deal with the outer
+-- List (using pattern matching), then use either <*> or
+-- lift to put a (:.) between the first element and the rest
+-- also possible with:
+--     sequence Nil = pure Nil
+--     sequence (x:.xs) = (:.) <$> x <*> (sequence xs)
+sequence :: Applicative f => List (f a) -> f (List a)
+sequence Nil = pure Nil
+sequence (x:.xs) = lift2 (:.) x (sequence xs)
 
 -- | Replicate an effect a given number of times.
 --
