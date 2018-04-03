@@ -310,13 +310,9 @@ sequence (x:.xs) = lift2 (:.) x (sequence xs)
 --
 -- >>> replicateA 3 ('a' :. 'b' :. 'c' :. Nil)
 -- ["aaa","aab","aac","aba","abb","abc","aca","acb","acc","baa","bab","bac","bba","bbb","bbc","bca","bcb","bcc","caa","cab","cac","cba","cbb","cbc","cca","ccb","ccc"]
-replicateA ::
-  Applicative f =>
-  Int
-  -> f a
-  -> f (List a)
-replicateA =
-  error "todo: Course.Applicative#replicateA"
+replicateA :: Applicative f => Int -> f a -> f (List a)
+replicateA 0 _ = pure Nil
+replicateA i x = lift2 (:.) x (replicateA (i-1) x)
 
 -- | Filter a list with a predicate that produces an effect.
 --
@@ -338,11 +334,7 @@ replicateA =
 -- >>> filtering (const $ True :. True :.  Nil) (1 :. 2 :. 3 :. Nil)
 -- [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
 --
-filtering ::
-  Applicative f =>
-  (a -> f Bool)
-  -> List a
-  -> f (List a)
+filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
 filtering =
   error "todo: Course.Applicative#filtering"
 
