@@ -334,9 +334,14 @@ replicateA i x = lift2 (:.) x (replicateA (i-1) x)
 -- >>> filtering (const $ True :. True :.  Nil) (1 :. 2 :. 3 :. Nil)
 -- [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
 --
+
+-- this works by having the pred function return a function
+-- in the monad to apply to the xs list
 filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
-filtering =
-  error "todo: Course.Applicative#filtering"
+filtering _ Nil = pure Nil
+filtering pred (x:.xs) =
+  let add = (\f -> if f then (x:.) else id) <$> (pred x)
+  in add <*> (filtering pred xs)
 
 -----------------------
 -- SUPPORT LIBRARIES --
