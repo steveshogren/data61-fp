@@ -57,10 +57,14 @@ instance Monad Optional where
 --
 -- >>> ((*) =<< (+10)) 7
 -- 119
+
+-- again, this is not intuitive for me, but it seems like
+-- it applies the t to both functions, then passes
+-- the ta function result into the tb
 instance Monad ((->) t) where
   (=<<) :: (a -> ((->) t b)) -> ((->) t a) -> ((->) t b)
-  (=<<) =
-    error "todo: Course.Monad (=<<)#instance ((->) t)"
+  (=<<) tb ta =
+    (\t -> (tb (ta t) t))
 
 -- | Witness that all things with (=<<) and (<$>) also have (<*>).
 --
