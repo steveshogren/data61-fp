@@ -97,13 +97,8 @@ instance Monad ((->) t) where
 --
 -- >>> ((*) <**> (+2)) 3
 -- 15
-(<**>) ::
-  Monad f =>
-  f (a -> b)
-  -> f a
-  -> f b
-(<**>) =
-  error "todo: Course.Monad#(<**>)"
+(<**>) :: Monad f => f (a -> b) -> f a -> f b
+(<**>) = (<*>)
 
 infixl 4 <**>
 
@@ -120,12 +115,8 @@ infixl 4 <**>
 --
 -- >>> join (+) 7
 -- 14
-join ::
-  Monad f =>
-  f (f a)
-  -> f a
-join =
-  error "todo: Course.Monad#join"
+join :: Monad f => f (f a) -> f a
+join mma = id =<< mma
 
 -- | Implement a flipped version of @(=<<)@, however, use only
 -- @join@ and @(<$>)@.
