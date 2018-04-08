@@ -124,13 +124,8 @@ join mma = id =<< mma
 --
 -- >>> ((+10) >>= (*)) 7
 -- 119
-(>>=) ::
-  Monad f =>
-  f a
-  -> (a -> f b)
-  -> f b
-(>>=) =
-  error "todo: Course.Monad#(>>=)"
+(>>=) :: Monad f => f a -> (a -> f b) -> f b
+(>>=) a f = join $ f <$> a
 
 infixl 1 >>=
 
