@@ -134,14 +134,8 @@ infixl 1 >>=
 --
 -- >>> ((\n -> n :. n :. Nil) <=< (\n -> n+1 :. n+2 :. Nil)) 1
 -- [2,2,3,3]
-(<=<) ::
-  Monad f =>
-  (b -> f c)
-  -> (a -> f b)
-  -> a
-  -> f c
-(<=<) =
-  error "todo: Course.Monad#(<=<)"
+(<=<) :: Monad f => (b -> f c) -> (a -> f b) -> a -> f c
+(<=<) fb fa a = (fa a) >>= fb
 
 infixr 1 <=<
 
