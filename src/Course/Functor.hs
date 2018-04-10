@@ -76,8 +76,7 @@ instance Functor ((->) t) where
 --
 -- prop> \x q -> x <$ Full q == Full x
 (<$) :: Functor f => a -> f b -> f a
-(<$) =
-  error "todo: Course.Functor#(<$)"
+(<$) a fb = (\_ -> a) <$> fb
 
 -- | Anonymous map producing unit value.
 --
@@ -92,12 +91,9 @@ instance Functor ((->) t) where
 --
 -- >>> void (+10) 5
 -- ()
-void ::
-  Functor f =>
-  f a
-  -> f ()
-void =
-  error "todo: Course.Functor#void"
+void :: Functor f => f a -> f ()
+void fa =
+  (\_ -> ()) <$> fa
 
 -----------------------
 -- SUPPORT LIBRARIES --
