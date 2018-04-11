@@ -137,6 +137,9 @@ infixl 1 >>=
 (<=<) :: Monad f => (b -> f c) -> (a -> f b) -> a -> f c
 (<=<) fb fa a = (fa a) >>= fb
 
+(>=>) :: Monad f => (a -> f b) -> (b -> f c) -> a -> f c
+(>=>) fa fb a = (fa a) >>= fb
+
 infixr 1 <=<
 
 -----------------------

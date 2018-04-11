@@ -114,17 +114,23 @@ getFiles =
 
 -- Given a file name, read it and for each line in that file, read and print contents of each.
 -- Use @getFiles@ and @printFiles@.
-run ::
-  FilePath
-  -> IO ()
-run =
-  error "todo: Course.FileIO#run"
+run :: FilePath -> IO ()
+run fileName = do
+  contents <- readFile fileName
+  let files = lines contents
+  (getFiles >=> printFiles) files
+
+-- getArgs :: IO (List Chars)
+-- putStrLn :: Chars -> IO ()
+-- readFile :: FilePath -> IO Chars
+-- lines :: Chars -> List Chars
+-- void :: IO a -> IO ()
 
 -- /Tip:/ use @getArgs@ and @run@
-main ::
-  IO ()
-main =
-  error "todo: Course.FileIO#main"
+main :: IO ()
+main = do
+  args <- getArgs
+  void $ sequence $ map run args
 
 ----
 
