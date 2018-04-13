@@ -60,12 +60,9 @@ put s = State (\_ -> ((),s))
 -- >>> runState ((+1) <$> State (\s -> (9, s * 2))) 3
 -- (10,6)
 instance Functor (State s) where
-  (<$>) ::
-    (a -> b)
-    -> State s a
-    -> State s b
-  (<$>) =
-    error "todo: Course.State#(<$>)"
+  (<$>) :: (a -> b) -> State s a -> State s b
+  (<$>) f (State fa) = State (\s -> let (out,s2) = (fa s)
+                                    in (f out, s2))
 
 -- | Implement the `Applicative` instance for `State s`.
 --
@@ -79,15 +76,9 @@ instance Functor (State s) where
 -- >>> runState (State (\s -> ((+3), s P.++ ["apple"])) <*> State (\s -> (7, s P.++ ["banana"]))) []
 -- (10,["apple","banana"])
 instance Applicative (State s) where
-  pure ::
-    a
-    -> State s a
-  pure =
-    error "todo: Course.State pure#instance (State s)"
-  (<*>) ::
-    State s (a -> b)
-    -> State s a
-    -> State s b 
+  pure :: a -> State s a
+  pure a = State (\s -> (a,s))
+  (<*>) :: State s (a -> b) -> State s a -> State s b
   (<*>) =
     error "todo: Course.State (<*>)#instance (State s)"
 
