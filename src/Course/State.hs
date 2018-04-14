@@ -75,12 +75,27 @@ instance Functor (State s) where
 -- >>> import qualified Prelude as P
 -- >>> runState (State (\s -> ((+3), s P.++ ["apple"])) <*> State (\s -> (7, s P.++ ["banana"]))) []
 -- (10,["apple","banana"])
+
+-- this really challenged my expectations. The State is the NEW State that the
+-- State function needs to perform its work. This is effectively an abstraction
+-- over the function inside a fold or recursive loop. It needs the new State
+-- before it can produce a result. In this abstraction, we execute the func
+-- State func FIRST, get its new State and func, then pass just the new State to
+-- the data State func. E.g. perhaps we need to get a func that needs a database
+-- connection. It would execute, collect the data to make the func, then the
+-- database connection is passed along to the second State that uses it to query
+-- for some other data from the database. After it has finished, the resulting
+-- func and data are combined to produce the "result" of the whole func, and the
+-- db connection is returned along with it.
 instance Applicative (State s) where
   pure :: a -> State s a
   pure a = State (\s -> (a,s))
   (<*>) :: State s (a -> b) -> State s a -> State s b
-  (<*>) =
-    error "todo: Course.State (<*>)#instance (State s)"
+  (<*>) (State f) (State a) =
+    State (\s ->
+             let (f1, s1) = f s
+                 (a1, s2) = a s1
+             in (f1 a1, s2))
 
 -- | Implement the `Bind` instance for `State s`.
 --
