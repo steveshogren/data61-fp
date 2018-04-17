@@ -125,7 +125,7 @@ instance Monad (State s) where
 -- >>> let p x = (\s -> (const $ pure (x == 'i')) =<< put (1+s)) =<< get in runState (findM p $ listh ['a'..'h']) 0
 -- (Empty,8)
 findM :: Monad f => (a -> f Bool) -> List a -> f (Optional a)
-findM f Nil = pure Empty
+findM _ Nil = pure Empty
 findM f (a:.as) =
   let result = f a
   in (\s -> if s then pure (Full a) else findM f as) =<< result
@@ -138,12 +138,12 @@ findM f (a:.as) =
 --
 -- prop> \xs -> case firstRepeat xs of Empty -> let xs' = hlist xs in nub xs' == xs'; Full x -> length (filter (== x) xs) > 1
 -- prop> \xs -> case firstRepeat xs of Empty -> True; Full x -> let (l, (rx :. rs)) = span (/= x) xs in let (l2, r2) = span (/= x) rs in let l3 = hlist (l ++ (rx :. Nil) ++ l2) in nub l3 == l3
-firstRepeat ::
-  Ord a =>
-  List a
-  -> Optional a
-firstRepeat =
-  error "todo: Course.State#firstRepeat"
+firstRepeat :: Ord a => List a -> Optional a
+firstRepeat l =
+  let pred elem = (\state -> (\i -> (const (pure i)) =<< put (S.insert elem state))
+                    =<< (pure $ S.member elem state))
+                  =<< get
+  in fst $ runState (findM pred l) S.empty
 
 -- | Remove all duplicate elements in a `List`.
 -- /Tip:/ Use `filtering` and `State` with a @Data.Set#Set@.
