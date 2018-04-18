@@ -138,11 +138,21 @@ findM f (a:.as) =
 --
 -- prop> \xs -> case firstRepeat xs of Empty -> let xs' = hlist xs in nub xs' == xs'; Full x -> length (filter (== x) xs) > 1
 -- prop> \xs -> case firstRepeat xs of Empty -> True; Full x -> let (l, (rx :. rs)) = span (/= x) xs in let (l2, r2) = span (/= x) rs in let l3 = hlist (l ++ (rx :. Nil) ++ l2) in nub l3 == l3
+
+
+-- We work backwards, starting by building an empty set, using 'get' to retrieve
+-- the State and pass it to the helper, then retrieving the bool value, passing
+-- it along to the second inner helper, then putting back on the new State.
+-- Since we need to check for membership before inserting the current element,
+-- we need the second inner helper
 firstRepeat :: Ord a => List a -> Optional a
 firstRepeat l =
-  let pred elem = (\state -> (\i -> (const (pure i)) =<< put (S.insert elem state))
-                    =<< (pure $ S.member elem state))
-                  =<< get
+  let pred elem = get
+                  >>= (\state -> (pure $ S.member elem state))
+                  >>= (\found ->
+                        get
+                        >>= (\state -> put (S.insert elem state))
+                        >>= (const (pure found)))
   in fst $ runState (findM pred l) S.empty
 
 -- | Remove all duplicate elements in a `List`.
