@@ -147,12 +147,12 @@ findM f (a:.as) =
 -- we need the second inner helper
 firstRepeat :: Ord a => List a -> Optional a
 firstRepeat l =
-  let pred elem = get
-                  >>= (\state -> (pure $ S.member elem state))
-                  >>= (\found ->
-                        get
-                        >>= (\state -> put (S.insert elem state))
-                        >>= (const (pure found)))
+  let pred elm = get
+                  >>= (\state ->
+                          let found = S.member elm state
+                          in get
+                             >>= (\state -> put (S.insert elm state))
+                             >>= (const (pure found)))
   in fst $ runState (findM pred l) S.empty
 
 -- | Remove all duplicate elements in a `List`.
@@ -161,12 +161,10 @@ firstRepeat l =
 -- prop> \xs -> firstRepeat (distinct xs) == Empty
 --
 -- prop> \xs -> distinct xs == distinct (flatMap (\x -> x :. x :. Nil) xs)
-distinct ::
-  Ord a =>
-  List a
-  -> List a
-distinct =
-  error "todo: Course.State#distinct"
+distinct :: Ord a => List a -> List a
+distinct l =
+  let pred elm = get >>= (\state -> (pure True))
+  in fst $ runState (filtering pred l) S.empty
 
 -- | A happy number is a positive integer, where the sum of the square of its digits eventually reaches 1 after repetition.
 -- In contrast, a sad number (not a happy number) is where the sum of the square of its digits never reaches 1
