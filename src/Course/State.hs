@@ -148,11 +148,10 @@ findM f (a:.as) =
 firstRepeat :: Ord a => List a -> Optional a
 firstRepeat l =
   let pred elm = get
-                  >>= (\state ->
-                          let found = S.member elm state
-                          in get
-                             >>= (\state -> put (S.insert elm state))
-                             >>= (const (pure found)))
+                  >>= (\set ->
+                          let found = S.member elm set
+                          in get >>= (\s -> put (S.insert elm s))
+                                 >>= (const (pure found)))
   in fst $ runState (findM pred l) S.empty
 
 -- | Remove all duplicate elements in a `List`.
@@ -161,9 +160,16 @@ firstRepeat l =
 -- prop> \xs -> firstRepeat (distinct xs) == Empty
 --
 -- prop> \xs -> distinct xs == distinct (flatMap (\x -> x :. x :. Nil) xs)
+
+-- the pattern of binding a value can be done with repeated new nested lambdas
+-- for each new binding
 distinct :: Ord a => List a -> List a
 distinct l =
-  let pred elm = get >>= (\state -> (pure True))
+  let pred elm = get >>= (\set ->
+                            (pure $ S.member elm set)
+                             >>= (\member ->
+                                    get >>= (\s -> put (S.insert elm s))
+                                          >>= (const $ pure $ not $ member)))
   in fst $ runState (filtering pred l) S.empty
 
 -- | A happy number is a positive integer, where the sum of the square of its digits eventually reaches 1 after repetition.
