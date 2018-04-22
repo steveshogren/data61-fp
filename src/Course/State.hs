@@ -12,6 +12,7 @@ import Course.List
 import Course.Functor
 import Course.Applicative
 import Course.Monad
+import Data.Char as C
 import qualified Data.Set as S
 
 -- $setup
@@ -193,8 +194,7 @@ distinct l =
 --
 -- >>> isHappy 44
 -- True
-isHappy ::
-  Integer
-  -> Bool
-isHappy =
-  error "todo: Course.State#isHappy"
+isHappy :: Integer -> Bool
+isHappy num =
+  let square = join (*)
+  in  map C.digitToInt (show' num)
