@@ -194,8 +194,20 @@ distinct l =
 --
 -- >>> isHappy 44
 -- True
+
 isHappy :: Integer -> Bool
-isHappy =
+isHappy num =
   let square = join (*)
       squares = toInteger . sum . map (square . C.digitToInt) . show'
-  in contains 1 . firstRepeat . produce squares
+  in contains 1 . firstRepeat . produce squares $ num
+
+-- It is clear here what they meant by the instructions:
+
+--   λ> happyView 4
+--     [4,16,37,58,89,145,42,20,4,16]
+--   λ> happyView 7
+--     [7,49,97,130,10,1,1,1,1,1]
+happyView num =
+  let square = join (*)
+      squares = toInteger . sum . map (square . C.digitToInt) . show'
+  in take 10 . produce squares $ num
