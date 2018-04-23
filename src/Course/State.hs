@@ -195,6 +195,7 @@ distinct l =
 -- >>> isHappy 44
 -- True
 isHappy :: Integer -> Bool
-isHappy num =
+isHappy =
   let square = join (*)
-  in  map C.digitToInt (show' num)
+      squares = toInteger . sum . map (square . C.digitToInt) . show'
+  in contains 1 . firstRepeat . produce squares
