@@ -207,6 +207,7 @@ isHappy num =
 --     [4,16,37,58,89,145,42,20,4,16]
 --   λ> happyView 7
 --     [7,49,97,130,10,1,1,1,1,1]
+happyView :: Integer -> List Integer
 happyView num =
   let square = join (*)
       squares = toInteger . sum . map (square . C.digitToInt) . show'
