@@ -29,9 +29,17 @@ newtype StateT s f a = StateT {runStateT :: s -> f (a, s)}
 --
 -- >>> runStateT ((+1) <$> (pure 2) :: StateT Int List Int) 0
 -- [(3,0)]
+
+-- State and StateT are like thunks that need to be evaluated to
+-- build the "next" thunk that performs work on the result
+
+-- * Take the function that is inside a StateT (which we'll call k)
+-- * Construct a new StateT, which first runs k, and then fmaps into the f (a, s) returned by k.
+-- We use first to fmap over the a instead of the (a, s)
 instance Functor f => Functor (StateT s f) where
   (<$>) :: (a -> b) -> StateT s f a -> StateT s f b
-  (<$>) f (StateT k) = StateT ((<$>) (\(a,t) -> (f a, t)) . k)
+  (<$>) ab (StateT k) = StateT (\s -> let f_out_s2 = (k s)
+                                      in (\(out, s2) -> (ab out, s2)) <$> f_out_s2)
 
 -- | Implement the `Applicative` instance for @StateT s f@ given a @Monad f@.
 --
