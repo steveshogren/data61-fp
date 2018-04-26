@@ -38,8 +38,8 @@ newtype StateT s f a = StateT {runStateT :: s -> f (a, s)}
 -- We use first to fmap over the a instead of the (a, s)
 instance Functor f => Functor (StateT s f) where
   (<$>) :: (a -> b) -> StateT s f a -> StateT s f b
-  (<$>) ab (StateT k) = StateT (\s -> let f_out_s2 = (k s)
-                                      in (\(out, s2) -> (ab out, s2)) <$> f_out_s2)
+  (<$>) ab (StateT s_f_a) = StateT (\s -> let f_a_s2 = (s_f_a s)
+                                          in (\(a, s2) -> (ab a, s2)) <$> f_a_s2)
 
 -- | Implement the `Applicative` instance for @StateT s f@ given a @Monad f@.
 --
@@ -59,17 +59,14 @@ instance Functor f => Functor (StateT s f) where
 -- >>> runStateT (StateT (\s -> ((+2), s P.++ [1]) :. ((+3), s P.++ [1]) :. Nil) <*> (StateT (\s -> (2, s P.++ [2]) :. Nil))) [0]
 -- [(4,[0,1,2]),(5,[0,1,2])]
 instance Monad f => Applicative (StateT s f) where
-  pure ::
-    a
-    -> StateT s f a
-  pure =
-    error "todo: Course.StateT pure#instance (StateT s f)"
-  (<*>) ::
-   StateT s f (a -> b)
-    -> StateT s f a
-    -> StateT s f b
-  (<*>) =
-    error "todo: Course.StateT (<*>)#instance (StateT s f)"
+  pure :: a -> StateT s f a
+  pure a = StateT (\s -> pure (a,s))
+  (<*>) :: StateT s f (a -> b) -> StateT s f a -> StateT s f b
+  (<*>) (StateT s_f_ab) (StateT s_f_a) =
+    StateT (\s -> let f_ab_s2 = (s_f_ab s)
+                  in (\(ab,s2) -> let f_a_s3 = (s_f_a s2)
+                                  in (\(a,s3) -> (ab a, s3)) <$> f_a_s3)
+                     <$> f_ab_s2)
 
 -- | Implement the `Monad` instance for @StateT s f@ given a @Monad f@.
 -- Make sure the state value is passed through in `bind`.
