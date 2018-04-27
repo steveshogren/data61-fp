@@ -62,11 +62,12 @@ instance Monad f => Applicative (StateT s f) where
   pure :: a -> StateT s f a
   pure a = StateT (\s -> pure (a,s))
   (<*>) :: StateT s f (a -> b) -> StateT s f a -> StateT s f b
-  (<*>) (StateT s_f_ab) (StateT s_f_a) =
-    StateT (\s -> let f_ab_s2 = (s_f_ab s)
-                  in (\(ab,s2) -> let f_a_s3 = (s_f_a s2)
-                                  in (\(a,s3) -> (ab a, s3)) <$> f_a_s3)
-                     <$> f_ab_s2)
+  (<*>) (StateT s_f_ab) s_f_a =
+    StateT ((\(ab,s2) -> runStateT (ab <$> s_f_a) s2) <=< s_f_ab)
+   -- StateT (\s -> let f_ab_s2 = (s_f_ab s)
+   --               in (\(ab,s2) -> let f_a_s3 = (s_f_a s2)
+   --                               in (\(a,s3) -> (ab a, s3)) <$> f_a_s3)
+   --                  <$> f_ab_s2)
 
 -- | Implement the `Monad` instance for @StateT s f@ given a @Monad f@.
 -- Make sure the state value is passed through in `bind`.
