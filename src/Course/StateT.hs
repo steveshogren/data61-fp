@@ -63,11 +63,8 @@ instance Monad f => Applicative (StateT s f) where
   pure a = StateT (\s -> pure (a,s))
   (<*>) :: StateT s f (a -> b) -> StateT s f a -> StateT s f b
   (<*>) (StateT s_f_ab) s_f_a =
-    StateT ((\(ab,s2) -> runStateT (ab <$> s_f_a) s2) <=< s_f_ab)
-   -- StateT (\s -> let f_ab_s2 = (s_f_ab s)
-   --               in (\(ab,s2) -> let f_a_s3 = (s_f_a s2)
-   --                               in (\(a,s3) -> (ab a, s3)) <$> f_a_s3)
-   --                  <$> f_ab_s2)
+    StateT (\s -> let f_ab_s2 = (s_f_ab s)
+                  in f_ab_s2 >>= (\(ab,s2) -> runStateT (ab <$> s_f_a) s2))
 
 -- | Implement the `Monad` instance for @StateT s f@ given a @Monad f@.
 -- Make sure the state value is passed through in `bind`.
@@ -78,10 +75,7 @@ instance Monad f => Applicative (StateT s f) where
 -- >>> let modify f = StateT (\s -> pure ((), f s)) in runStateT (modify (+1) >>= \() -> modify (*2)) 7
 -- ((),16)
 instance Monad f => Monad (StateT s f) where
-  (=<<) ::
-    (a -> StateT s f b)
-    -> StateT s f a
-    -> StateT s f b
+  (=<<) :: (a -> StateT s f b) -> StateT s f a -> StateT s f b
   (=<<) =
     error "todo: Course.StateT (=<<)#instance (StateT s f)"
 
