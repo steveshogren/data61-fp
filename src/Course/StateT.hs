@@ -76,8 +76,9 @@ instance Monad f => Applicative (StateT s f) where
 -- ((),16)
 instance Monad f => Monad (StateT s f) where
   (=<<) :: (a -> StateT s f b) -> StateT s f a -> StateT s f b
-  (=<<) =
-    error "todo: Course.StateT (=<<)#instance (StateT s f)"
+  (=<<) a_sfb (StateT sfa) =
+    StateT (\s -> let fa = sfa s
+                  in fa >>= (\(a,s2) -> runStateT (a_sfb a) s2))
 
 -- | A `State'` is `StateT` specialised to the `ExactlyOne` functor.
 type State' s a =
@@ -87,9 +88,7 @@ type State' s a =
 --
 -- >>> runStateT (state' $ runState $ put 1) 0
 -- ExactlyOne  ((),1)
-state' ::
-  (s -> (a, s))
-  -> State' s a
+state' :: (s -> (a, s)) -> State' s a
 state' =
   error "todo: Course.StateT#state'"
 
