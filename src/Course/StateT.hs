@@ -89,28 +89,19 @@ type State' s a =
 -- >>> runStateT (state' $ runState $ put 1) 0
 -- ExactlyOne  ((),1)
 state' :: (s -> (a, s)) -> State' s a
-state' =
-  error "todo: Course.StateT#state'"
+state' f = StateT (\s -> ExactlyOne (f s))
 
 -- | Provide an unwrapper for `State'` values.
 --
 -- >>> runState' (state' $ runState $ put 1) 0
 -- ((),1)
-runState' ::
-  State' s a
-  -> s
-  -> (a, s)
-runState' =
-  error "todo: Course.StateT#runState'"
+runState' :: State' s a -> s -> (a, s)
+runState' (StateT st) s =
+  runExactlyOne $ st s
 
 -- | Run the `StateT` seeded with `s` and retrieve the resulting state.
-execT ::
-  Functor f =>
-  StateT s f a
-  -> s
-  -> f s
-execT =
-  error "todo: Course.StateT#execT"
+execT :: Functor f => StateT s f a -> s -> f s
+execT (StateT sfa) s = snd <$> (sfa s)
 
 -- | Run the `State` seeded with `s` and retrieve the resulting state.
 exec' ::
