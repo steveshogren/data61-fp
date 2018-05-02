@@ -120,8 +120,7 @@ eval' (StateT sa) s = fst $ runExactlyOne $ sa s
 -- >>> (runStateT (getT :: StateT Int List Int) 3)
 -- [(3,3)]
 getT :: Applicative f => StateT s f s
-getT =
-  error "todo: Course.StateT#getT"
+getT = StateT (\s -> pure (s,s))
 
 -- | A `StateT` where the resulting state is seeded with the given value.
 --
@@ -130,12 +129,8 @@ getT =
 --
 -- >>> runStateT (putT 2 :: StateT Int List ()) 0
 -- [((),2)]
-putT ::
-  Applicative f =>
-  s
-  -> StateT s f ()
-putT =
-  error "todo: Course.StateT#putT"
+putT :: Applicative f => s -> StateT s f ()
+putT s = StateT (\_ -> pure ((),s) )
 
 -- | Remove all duplicate elements in a `List`.
 --
