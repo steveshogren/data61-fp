@@ -137,12 +137,13 @@ putT s = StateT (\_ -> pure ((),s) )
 -- /Tip:/ Use `filtering` and `State'` with a @Data.Set#Set@.
 --
 -- prop> \xs -> distinct' xs == distinct' (flatMap (\x -> x :. x :. Nil) xs)
-distinct' ::
-  (Ord a, Num a) =>
-  List a
-  -> List a
-distinct' =
-  error "todo: Course.StateT#distinct'"
+
+-- filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
+distinct' :: (Ord a, Num a) => List a -> List a
+distinct' l =
+  let pred elem = getT >>= (\set -> let inSet = S.member elem set
+                                    in  (putT $ S.insert elem set) >>= (const $ pure inSet))
+  in fst $ runState' (filtering pred l) S.empty
 
 -- | Remove all duplicate elements in a `List`.
 -- However, if you see a value greater than `100` in the list,
@@ -155,10 +156,7 @@ distinct' =
 --
 -- >>> distinctF $ listh [1,2,3,2,1,101]
 -- Empty
-distinctF ::
-  (Ord a, Num a) =>
-  List a
-  -> Optional (List a)
+distinctF :: (Ord a, Num a) => List a -> Optional (List a)
 distinctF =
   error "todo: Course.StateT#distinctF"
 
