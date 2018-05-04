@@ -156,9 +156,18 @@ distinct' l =
 --
 -- >>> distinctF $ listh [1,2,3,2,1,101]
 -- Empty
+
+-- filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
+
+distinctFPred :: (Ord a, Num a) => a -> StateT (S.Set a) Optional Bool
+distinctFPred elem = getT >>= (\set -> let inSet = S.member elem set
+                                       in (putT $ S.insert elem set) >>=
+                                          (\_ -> if elem > 100 then StateT (\_ -> Empty) else (pure inSet)) )
 distinctF :: (Ord a, Num a) => List a -> Optional (List a)
-distinctF =
-  error "todo: Course.StateT#distinctF"
+distinctF l =
+  let x = runStateT (filtering distinctFPred l) S.empty
+  in fst <$> x
+
 
 -- | An `OptionalT` is a functor of an `Optional` value.
 data OptionalT f a =
