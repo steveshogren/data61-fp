@@ -141,8 +141,8 @@ putT s = StateT (\_ -> pure ((),s) )
 -- filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
 distinct' :: (Ord a, Num a) => List a -> List a
 distinct' l =
-  let pred elem = getT >>= (\set -> let inSet = S.member elem set
-                                    in  (putT $ S.insert elem set) >>= (const $ pure inSet))
+  let pred x = getT >>= (\set -> let inSet = S.member x set
+                                    in  (putT $ S.insert x set) >>= (const $ pure $ not inSet))
   in fst $ runState' (filtering pred l) S.empty
 
 -- | Remove all duplicate elements in a `List`.
@@ -160,9 +160,9 @@ distinct' l =
 -- filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
 
 distinctFPred :: (Ord a, Num a) => a -> StateT (S.Set a) Optional Bool
-distinctFPred elem = getT >>= (\set -> let inSet = S.member elem set
-                                       in (putT $ S.insert elem set) >>=
-                                          (\_ -> if elem > 100 then StateT (\_ -> Empty) else (pure inSet)) )
+distinctFPred x = getT >>= (\set -> let inSet = S.member x set
+                                       in (putT $ S.insert x set) >>=
+                                          (\_ -> if x > 100 then StateT (\_ -> Empty) else (pure $ not inSet)) )
 distinctF :: (Ord a, Num a) => List a -> Optional (List a)
 distinctF l =
   let x = runStateT (filtering distinctFPred l) S.empty
