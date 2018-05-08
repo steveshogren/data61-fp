@@ -180,7 +180,11 @@ data OptionalT f a =
 --
 -- >>> runOptionalT $ (+1) <$> OptionalT (Full 1 :. Empty :. Nil)
 -- [Full 2,Empty]
+fmap :: Functor f => (a -> b) -> f a -> f b
+fmap = (<$>)
+
 instance Functor f => Functor (OptionalT f) where
+  (<$>) :: (a -> b) -> (OptionalT f a) -> (OptionalT f b)
   (<$>) f (OptionalT fx) =
     OptionalT (let f' = (<$>) f
                in f' <$> fx)
@@ -193,8 +197,9 @@ instance Applicative f => Applicative (OptionalT f) where
   pure :: a -> OptionalT f a
   pure x = OptionalT (pure $ Full x)
   (<*>) :: OptionalT f (a -> b) -> OptionalT f a -> OptionalT f b
-  (<*>) f fx = error ""
-
+  (<*>) (OptionalT ab) (OptionalT a) =
+    error ""
+    -- OptionalT (let ab' = (<*>) ab in ab' (<*>) a)
 
 -- | Implement the `Monad` instance for `OptionalT f` given a Monad f.
 --

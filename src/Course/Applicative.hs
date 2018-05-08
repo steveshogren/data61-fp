@@ -353,6 +353,9 @@ instance Applicative IO where
   f <*> a =
     f P.>>= \f' -> P.fmap f' a
 
+ap :: Applicative f => f (a -> b) -> f a -> f b
+ap = (<*>)
+
 return ::
   Applicative f =>
   a
