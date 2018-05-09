@@ -186,20 +186,22 @@ fmap = (<$>)
 instance Functor f => Functor (OptionalT f) where
   (<$>) :: (a -> b) -> (OptionalT f a) -> (OptionalT f b)
   (<$>) f (OptionalT fx) =
-    OptionalT (let f' = (<$>) f
-               in f' <$> fx)
+    OptionalT ((fmap . fmap $ f) fx)
 
 -- | Implement the `Applicative` instance for `OptionalT f` given a Applicative f.
 --
 -- >>> runOptionalT $ OptionalT (Full (+1) :. Full (+2) :. Nil) <*> OptionalT (Full 1 :. Empty :. Nil)
 -- [Full 2,Empty,Full 3,Empty]
+
+ap' :: Applicative f => f (a -> b) -> f a -> f b
+ap' = (<*>)
+
 instance Applicative f => Applicative (OptionalT f) where
   pure :: a -> OptionalT f a
   pure x = OptionalT (pure $ Full x)
   (<*>) :: OptionalT f (a -> b) -> OptionalT f a -> OptionalT f b
-  (<*>) (OptionalT ab) (OptionalT a) =
-    error ""
-    -- OptionalT (let ab' = (<*>) ab in ab' (<*>) a)
+  (<*>) (OptionalT f_o_ab) (OptionalT f_o_a) =
+    OptionalT (lift2 ap' f_o_ab f_o_a)
 
 -- | Implement the `Monad` instance for `OptionalT f` given a Monad f.
 --
