@@ -224,8 +224,9 @@ data Logger l a =
 -- >>> (+3) <$> Logger (listh [1,2]) 3
 -- Logger [1,2] 6
 instance Functor (Logger l) where
-  (<$>) =
-    error "todo: Course.StateT (<$>)#instance (Logger l)"
+  (<$>) :: (a -> b) -> Logger l a -> Logger l b
+  (<$>) f (Logger l a )=
+    Logger l (f a)
 
 -- | Implement the `Applicative` instance for `Logger`.
 --
