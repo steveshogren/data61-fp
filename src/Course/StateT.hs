@@ -254,17 +254,13 @@ instance Monad (Logger l) where
     let (Logger l2 b) = f a
     in Logger (l1 ++ l2) b
 
-
 -- | A utility function for producing a `Logger` with one log value.
 --
 -- >>> log1 1 2
 -- Logger [1] 2
-log1 ::
-  l
-  -> a
-  -> Logger l a
-log1 =
-  error "todo: Course.StateT#log1"
+log1 :: l -> a -> Logger l a
+log1 l a =
+  Logger (l :. Nil) a
 
 -- | Remove all duplicate integers from a list. Produce a log as you go.
 -- If there is an element above 100, then abort the entire computation and produce no result.
@@ -280,9 +276,24 @@ log1 =
 --
 -- >>> distinctG $ listh [1,2,3,2,6,106]
 -- Logger ["even number: 2","even number: 2","even number: 6","aborting > 100: 106"] Empty
-distinctG ::
-  (Integral a, Show a) =>
-  List a
-  -> Logger Chars (Optional (List a))
-distinctG =
-  error "todo: Course.StateT#distinctG"
+
+distinctGPred :: (Ord a, Num a) => a -> StateT (S.Set a) (OptionalT (Logger Chars )) Bool
+distinctGPred x = error "test"
+ --  getT >>= (\set -> let inSet = S.member x set
+ --                                       in (putT $ S.insert x set) >>=
+ --                                          (\_ -> if x > 100 then StateT (\_ -> Empty) else (pure $ not inSet)) )
+
+distinctG :: (Integral a, Show a) => List a -> Logger Chars (Optional (List a))
+distinctG l =
+   let x = runStateT (filtering distinctGPred l) S.empty
+   -- in Logger (log1 "") (fst <$> x)
+   in Logger ("" :. Nil) (Empty)
+
+-- distinctFPred :: (Ord a, Num a) => a -> StateT (S.Set a) Optional Bool
+-- distinctFPred x = getT >>= (\set -> let inSet = S.member x set
+--                                        in (putT $ S.insert x set) >>=
+--                                           (\_ -> if x > 100 then StateT (\_ -> Empty) else (pure $ not inSet)) )
+-- distinctF :: (Ord a, Num a) => List a -> Optional (List a)
+-- distinctF l =
+--   let x = runStateT (filtering distinctFPred l) S.empty
+--   in fst <$> x
