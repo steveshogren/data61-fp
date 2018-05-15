@@ -277,17 +277,21 @@ log1 l a =
 -- >>> distinctG $ listh [1,2,3,2,6,106]
 -- Logger ["even number: 2","even number: 2","even number: 6","aborting > 100: 106"] Empty
 
-distinctGPred :: (Ord a, Num a) => a -> StateT (S.Set a) (OptionalT (Logger Chars )) Bool
-distinctGPred x = error "test"
- --  getT >>= (\set -> let inSet = S.member x set
- --                                       in (putT $ S.insert x set) >>=
- --                                          (\_ -> if x > 100 then StateT (\_ -> Empty) else (pure $ not inSet)) )
+distinctGPred :: (Integral a, Show a) => a -> StateT (S.Set a) (OptionalT (Logger Chars)) Bool
+distinctGPred a =
+  StateT (\set -> OptionalT (
+                               if a > 100 then
+                                 log1 (fromString ("aborting > 100: " P.++ show a)) Empty
+                               else (if even a then
+                                       log1 (fromString ("even number: " P.++ show a))
+                                     else pure)
+                            (Full (a `S.notMember` set, a `S.insert` set))))
+
+-- filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
 
 distinctG :: (Integral a, Show a) => List a -> Logger Chars (Optional (List a))
 distinctG l =
-   let x = runStateT (filtering distinctGPred l) S.empty
-   -- in Logger (log1 "") (fst <$> x)
-   in Logger ("" :. Nil) (Empty)
+   runOptionalT $ (evalT (filtering distinctGPred l) S.empty)
 
 -- distinctFPred :: (Ord a, Num a) => a -> StateT (S.Set a) Optional Bool
 -- distinctFPred x = getT >>= (\set -> let inSet = S.member x set
