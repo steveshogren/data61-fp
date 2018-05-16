@@ -139,11 +139,18 @@ putT s = StateT (\_ -> pure ((),s) )
 -- prop> \xs -> distinct' xs == distinct' (flatMap (\x -> x :. x :. Nil) xs)
 
 -- filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
+
+distinctPred' :: (Ord a) => a -> StateT (S.Set a) ExactlyOne Bool
+distinctPred' x = getT >>= (\set -> let inSet = S.member x set
+                                    in  (putT $ S.insert x set) >>= (const $ pure $ not inSet))
+
+distinctPred'' :: (Ord a) => a -> StateT (S.Set a) ExactlyOne Bool
+distinctPred'' x = StateT (\set -> let inSet = S.member x set
+                                   in  ExactlyOne ((not inSet), (S.insert x set)))
+
 distinct' :: (Ord a, Num a) => List a -> List a
 distinct' l =
-  let pred x = getT >>= (\set -> let inSet = S.member x set
-                                    in  (putT $ S.insert x set) >>= (const $ pure $ not inSet))
-  in fst $ runState' (filtering pred l) S.empty
+  fst $ runState' (filtering distinctPred'' l) S.empty
 
 -- | Remove all duplicate elements in a `List`.
 -- However, if you see a value greater than `100` in the list,
@@ -163,9 +170,14 @@ distinctFPred :: (Ord a, Num a) => a -> StateT (S.Set a) Optional Bool
 distinctFPred x = getT >>= (\set -> let inSet = S.member x set
                                        in (putT $ S.insert x set) >>=
                                           (\_ -> if x > 100 then StateT (\_ -> Empty) else (pure $ not inSet)) )
+
+distinctFPred' :: (Ord a, Num a) => a -> StateT (S.Set a) Optional Bool
+distinctFPred' x = StateT (\set -> let nextState = (not $ S.member x set, S.insert x set)
+                                   in if x > 100 then Empty else (Full nextState))
+
 distinctF :: (Ord a, Num a) => List a -> Optional (List a)
 distinctF l =
-  let x = runStateT (filtering distinctFPred l) S.empty
+  let x = runStateT (filtering distinctFPred' l) S.empty
   in fst <$> x
 
 
@@ -282,10 +294,11 @@ distinctGPred a =
   StateT (\set -> OptionalT (
                                if a > 100 then
                                  log1 (fromString ("aborting > 100: " P.++ show a)) Empty
-                               else (if even a then
-                                       log1 (fromString ("even number: " P.++ show a))
-                                     else pure)
-                            (Full (a `S.notMember` set, a `S.insert` set))))
+                               else
+                                 let nextState = (Full (a `S.notMember` set, a `S.insert` set))
+                                 in (if even a then
+                                       log1 (fromString ("even number: " P.++ show a)) nextState
+                                      else pure nextState)))
 
 -- filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
 
