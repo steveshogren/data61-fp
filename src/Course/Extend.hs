@@ -52,12 +52,9 @@ instance Extend List where
 -- >>> id <<= Empty
 -- Empty
 instance Extend Optional where
-  (<<=) ::
-    (Optional a -> b)
-    -> Optional a
-    -> Optional b
-  (<<=) =
-    error "todo: Course.Extend (<<=)#instance Optional"
+  (<<=) :: (Optional a -> b) -> Optional a -> Optional b
+  (<<=) _ Empty = Empty
+  (<<=) fa_b fa = Full (fa_b fa)
 
 -- | Duplicate the functor using extension.
 --
@@ -72,9 +69,6 @@ instance Extend Optional where
 --
 -- >>> cojoin Empty
 -- Empty
-cojoin ::
-  Extend f =>
-  f a
-  -> f (f a)
-cojoin =
-  error "todo: Course.Extend#cojoin"
+cojoin :: Extend f => f a -> f (f a)
+cojoin a =
+  id <<= a
