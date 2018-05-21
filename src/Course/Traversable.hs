@@ -24,38 +24,21 @@ import Course.Compose
 -- * The law of composition
 --   `∀f g. traverse ((g <$>) . f) ≅ (traverse g <$>) . traverse f`
 class Functor t => Traversable t where
-  traverse ::
-    Applicative f =>
-    (a -> f b)
-    -> t a
-    -> f (t b)
+  traverse :: Applicative f => (a -> f b) -> t a -> f (t b)
 
 instance Traversable List where
-  traverse ::
-    Applicative f =>
-    (a -> f b)
-    -> List a
-    -> f (List b)
+  traverse :: Applicative f => (a -> f b) -> List a -> f (List b)
   traverse f =
     foldRight (\a b -> (:.) <$> f a <*> b) (pure Nil)
 
 instance Traversable ExactlyOne where
-  traverse ::
-    Applicative f =>
-    (a -> f b)
-    -> ExactlyOne a
-    -> f (ExactlyOne b)
-  traverse =
-    error "todo: Course.Traversable traverse#instance ExactlyOne"
+  traverse :: Applicative f => (a -> f b) -> ExactlyOne a -> f (ExactlyOne b)
+  traverse a_fb (ExactlyOne a) = pure <$> a_fb a
 
 instance Traversable Optional where
-  traverse ::
-    Applicative f =>
-    (a -> f b)
-    -> Optional a
-    -> f (Optional b)
-  traverse =
-    error "todo: Course.Traversable traverse#instance Optional"
+  traverse :: Applicative f => (a -> f b) -> Optional a -> f (Optional b)
+  traverse _ Empty = pure Empty
+  traverse a_fb (Full a) = pure <$> a_fb a
 
 -- | Sequences a traversable value of structures to a structure of a traversable value.
 --
