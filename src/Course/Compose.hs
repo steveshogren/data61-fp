@@ -14,10 +14,13 @@ import Course.Monad
 newtype Compose f g a =
   Compose (f (g a))
 
+fmap :: Functor f => (a -> b) -> f a -> f b
+fmap a b = (a <$> b)
+
 -- Implement a Functor instance for Compose
 instance (Functor f, Functor g) => Functor (Compose f g) where
   (<$>) :: (a -> b) -> (Compose f g a) -> (Compose f g b)
-  (<$>) a_b (Compose f_c_a) = Compose ((a_b <$>) <$> f_c_a)
+  (<$>) a_b (Compose f_c_a) = Compose ((fmap a_b) <$> f_c_a)
 
 instance (Applicative f, Applicative g) =>
   Applicative (Compose f g) where
@@ -33,4 +36,4 @@ instance (Monad f, Monad g) =>
   Monad (Compose f g) where
 -- Implement the (=<<) function for a Monad instance for Compose
   (=<<) :: (a -> Compose f g b) -> (Compose f g a) -> (Compose f g b)
-  (=<<) a_mcb (Compose m_c_a) = error "can't 'unpack' the compose value to pass to a_mcb"
+  (=<<) _ (Compose _) = error "can't 'unpack' the compose value to pass to a_mcb"
