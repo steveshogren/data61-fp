@@ -14,13 +14,10 @@ import Course.Monad
 newtype Compose f g a =
   Compose (f (g a))
 
-fmap :: Functor f => (a -> b) -> f a -> f b
-fmap a b = (a <$> b)
-
 -- Implement a Functor instance for Compose
 instance (Functor f, Functor g) => Functor (Compose f g) where
   (<$>) :: (a -> b) -> (Compose f g a) -> (Compose f g b)
-  (<$>) a_b (Compose f_c_a) = Compose ((fmap a_b) <$> f_c_a)
+  (<$>) a_b (Compose fga) = Compose ((a_b <$>) <$> fga)
 
 instance (Applicative f, Applicative g) =>
   Applicative (Compose f g) where
@@ -29,8 +26,8 @@ instance (Applicative f, Applicative g) =>
   pure a = Compose (pure $ pure $ a)
 -- Implement the (<*>) function for an Applicative instance for Compose
   (<*>) :: (Compose f g (a -> b)) -> (Compose f g a) -> (Compose f g b)
-  (<*>) (Compose fga_b) (Compose fga_a) =
-    Compose (pure (<*>) <*> fga_b <*> fga_a)
+  (<*>) (Compose fga_b) (Compose fga) =
+    Compose (pure (<*>) <*> fga_b <*> fga)
 
 instance (Monad f, Monad g) =>
   Monad (Compose f g) where
