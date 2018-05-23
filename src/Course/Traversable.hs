@@ -53,10 +53,15 @@ instance Traversable Optional where
 sequenceA :: (Applicative f, Traversable t) => t (f a) -> f (t a)
 sequenceA tfa = traverse (\fa -> fa) tfa
 
+-- Thoughts
+  -- the previous instances were able to "unpack" the types using
+  -- simple pattern matching
+  -- as evidenced by the lack of a Monad instance, we cannot do that here
 instance (Traversable f, Traversable g) => Traversable (Compose f g) where
-  traverse :: (Applicative z) => (a -> z b) -> Compose f g a -> z (Compose f g b)
-  traverse z (Compose fga) = (z (<$>)) <$> fga
-
+  traverse :: (Functor h) => (a -> h b) -> Compose f g a -> h (Compose f g b)
+  traverse a_hb (Compose fga) =
+    error "unsure how to complete"
+    -- (a_hb (<$>)) <$> fga
 
 -- | The `Product` data type contains one value from each of the two type constructors.
 data Product f g a =
@@ -65,14 +70,18 @@ data Product f g a =
 instance (Functor f, Functor g) =>
   Functor (Product f g) where
 -- Implement the (<$>) function for a Functor instance for Product
-  (<$>) =
-    error "todo: Course.Traversable (<$>)#instance (Product f g)"
+  (<$>) :: (a -> b) -> (Product f g a) -> (Product f g b)
+  (<$>) a_b (Product fa ga) =
+    Product (a_b <$> fa) (a_b <$> ga)
 
 instance (Traversable f, Traversable g) =>
   Traversable (Product f g) where
 -- Implement the traverse function for a Traversable instance for Product
-  traverse =
-    error "todo: Course.Traversable traverse#instance (Product f g)"
+  traverse :: (Functor h) => (a -> h b) -> Product f g a -> h (Product f g b)
+  traverse _ _ =
+    error ""
+  -- traverse a_hb (Product fa ga) =
+  --   Product (a_hb <$> fa) (a_hb <$> ga)
 
 -- | The `Coproduct` data type contains one value from either of the two type constructors.
 data Coproduct f g a =
@@ -82,8 +91,9 @@ data Coproduct f g a =
 instance (Functor f, Functor g) =>
   Functor (Coproduct f g) where
 -- Implement the (<$>) function for a Functor instance for Coproduct
-  (<$>) =
-    error "todo: Course.Traversable (<$>)#instance (Coproduct f g)"
+  (<$>) :: (a -> b) -> (Coproduct f g a) -> (Coproduct f g b)
+  (<$>) a_b (InL fa) = InL (a_b <$> fa)
+  (<$>) a_b (InR ga) = InR (a_b <$> ga)
 
 instance (Traversable f, Traversable g) =>
   Traversable (Coproduct f g) where
