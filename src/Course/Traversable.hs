@@ -54,11 +54,6 @@ instance Traversable Optional where
 sequenceA :: (Applicative f, Traversable t) => t (f a) -> f (t a)
 sequenceA tfa = traverse (\fa -> fa) tfa
 
--- Thoughts
-  -- the previous instances were able to "unpack" the types using
-  -- simple pattern matching
-  -- as evidenced by the lack of a Monad instance, we cannot do that here
-
 instance (Traversable f, Traversable g) => Traversable (Compose f g) where
   traverse :: (Applicative h) => (a -> h b) -> Compose f g a -> h (Compose f g b)
   traverse a_hb fga = sequenceA (a_hb <$> fga)
@@ -78,10 +73,7 @@ instance (Traversable f, Traversable g) =>
   Traversable (Product f g) where
 -- Implement the traverse function for a Traversable instance for Product
   traverse :: (Applicative h) => (a -> h b) -> Product f g a -> h (Product f g b)
-  traverse _ _ =
-    error ""
-  -- traverse a_hb (Product fa ga) =
-  --   Product (a_hb <$> fa) (a_hb <$> ga)
+  traverse a_hb fga = sequenceA (a_hb <$> fga)
 
 -- | The `Coproduct` data type contains one value from either of the two type constructors.
 data Coproduct f g a =
@@ -99,6 +91,4 @@ instance (Traversable f, Traversable g) =>
   Traversable (Coproduct f g) where
 -- Implement the traverse function for a Traversable instance for Coproduct
   traverse :: (Applicative h) => (a -> h b) -> (Coproduct f g a) -> h (Coproduct f g b)
-  traverse = error ""
-  -- traverse a_hb (InL fa) = pure <$> (a_hb <$> fa)
-  -- traverse a_hb (InR ga) = pure <$> (a_hb ga)
+  traverse a_hb fga = sequenceA (a_hb <$> fga)
