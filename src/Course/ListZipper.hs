@@ -1,3 +1,4 @@
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -37,17 +38,11 @@ data ListZipper a =
   ListZipper (List a) a (List a)
   deriving Eq
 
-lefts ::
-  ListZipper a
-  -> List a
-lefts (ListZipper l _ _) =
-  l
+lefts :: ListZipper a -> List a
+lefts (ListZipper l _ _) = l
 
-rights ::
-  ListZipper a
-  -> List a
-rights (ListZipper _ _ r) =
-  r
+rights :: ListZipper a -> List a
+rights (ListZipper _ _ r) = r
 
 -- A `MaybeListZipper` is a data structure that allows us to "fail" zipper operations.
 -- e.g. Moving left when there are no values to the left.
@@ -64,16 +59,17 @@ data MaybeListZipper a =
 -- >>> (+1) <$> (zipper [3,2,1] 4 [5,6,7])
 -- [4,3,2] >5< [6,7,8]
 instance Functor ListZipper where
-  (<$>) =
-    error "todo: Course.ListZipper (<$>)#instance ListZipper"
+  (<$>) :: (a -> b) -> ListZipper a -> ListZipper b
+  (<$>) a_b (ListZipper l a r) = (ListZipper (a_b <$> l) (a_b a) (a_b <$> r))
 
 -- | Implement the `Functor` instance for `MaybeListZipper`.
 --
 -- >>> (+1) <$> (IsZ (zipper [3,2,1] 4 [5,6,7]))
 -- [4,3,2] >5< [6,7,8]
 instance Functor MaybeListZipper where
-  (<$>) =
-    error "todo: Course.ListZipper (<$>)#instance MaybeListZipper"
+  (<$>) :: (a -> b) -> MaybeListZipper a -> MaybeListZipper b
+  (<$>) _ IsNotZ = IsNotZ
+  (<$>) a_b (IsZ lz) = IsZ (a_b <$> lz)
 
 -- | Convert the given zipper back to a list.
 --
