@@ -81,20 +81,13 @@ instance Functor MaybeListZipper where
 --
 -- >>> toList (ListZipper (3:.2:.1:.Nil) 4 (5:.6:.7:.Nil))
 -- [1,2,3,4,5,6,7]
-toList ::
-  ListZipper a
-  -> List a
-toList =
-  error "todo: Course.ListZipper#toList"
+toList :: ListZipper a -> List a
+toList (ListZipper l a r) = (reverse l) ++ (a:.Nil) ++ r
 
 -- | Convert the given (maybe) zipper back to a list.
-toListZ ::
-  MaybeListZipper a
-  -> List a
-toListZ IsNotZ =
-  Nil
-toListZ (IsZ z) =
-  toList z
+toListZ :: MaybeListZipper a -> List a
+toListZ IsNotZ = Nil
+toListZ (IsZ z) = toList z
 
 -- | Create a `MaybeListZipper` positioning the focus at the head.
 --
@@ -105,43 +98,28 @@ toListZ (IsZ z) =
 -- ><
 --
 -- prop> \xs -> xs == toListZ (fromList xs)
-fromList ::
-  List a
-  -> MaybeListZipper a
-fromList =
-  error "todo: Course.ListZipper#fromList"
+fromList :: List a -> MaybeListZipper a
+fromList Nil = IsNotZ
+fromList (x:.xs) = IsZ (ListZipper Nil x xs)
 
 -- | Retrieve the `ListZipper` from the `MaybeListZipper` if there is one.
 --
 -- prop> \xs -> isEmpty xs == (toOptional (fromList xs) == Empty)
 --
 -- prop> \z -> toOptional (fromOptional z) == z
-toOptional ::
-  MaybeListZipper a
-  -> Optional (ListZipper a)
-toOptional =
-  error "todo: Course.ListZipper#toOptional"
+toOptional :: MaybeListZipper a -> Optional (ListZipper a)
+toOptional IsNotZ = Empty
+toOptional (IsZ lz) = Full lz
 
-zipper ::
-  [a]
-  -> a
-  -> [a]
-  -> ListZipper a
+zipper :: [a] -> a -> [a] -> ListZipper a
 zipper l x r =
   ListZipper (listh l) x (listh r)
 
-fromOptional ::
-  Optional (ListZipper a)
-  -> MaybeListZipper a
-fromOptional Empty =
-  IsNotZ
-fromOptional (Full z) =
-  IsZ z
+fromOptional :: Optional (ListZipper a) -> MaybeListZipper a
+fromOptional Empty = IsNotZ
+fromOptional (Full z) = IsZ z
 
-asZipper ::
-  (ListZipper a -> ListZipper a)
-  -> MaybeListZipper a
-  -> MaybeListZipper a
+asZipper :: (ListZipper a -> ListZipper a) -> MaybeListZipper a -> MaybeListZipper a
 asZipper f =
   asMaybeZipper (IsZ . f)
 
