@@ -153,12 +153,9 @@ asMaybeZipper f (IsZ z) =
 --
 -- >>> withFocus (+1) (zipper [1,0] 2 [3,4])
 -- [1,0] >3< [3,4]
-withFocus ::
-  (a -> a)
-  -> ListZipper a
-  -> ListZipper a
-withFocus =
-  error "todo: Course.ListZipper#withFocus"
+withFocus :: (a -> a) -> ListZipper a -> ListZipper a
+withFocus f (ListZipper l x r) =
+  ListZipper l (f x) r
 
 -- | Set the focus of the zipper to the given value.
 -- /Tip:/ Use `withFocus`.
@@ -168,20 +165,13 @@ withFocus =
 --
 -- >>> setFocus 1 (zipper [1,0] 2 [3,4])
 -- [1,0] >1< [3,4]
-setFocus ::
-  a
-  -> ListZipper a
-  -> ListZipper a
-setFocus =
-  error "todo: Course.ListZipper#setFocus"
+setFocus :: a -> ListZipper a -> ListZipper a
+setFocus a lz = withFocus (const a) lz
 
 -- A flipped infix alias for `setFocus`. This allows:
 --
 -- z .= "abc" -- sets the focus on the zipper z to the value "abc".
-(.=) ::
-  ListZipper a
-  -> a
-  -> ListZipper a
+(.=) :: ListZipper a -> a -> ListZipper a
 (.=) =
   flip setFocus
 
@@ -192,11 +182,8 @@ setFocus =
 --
 -- >>> hasLeft (zipper [] 0 [1,2])
 -- False
-hasLeft ::
-  ListZipper a
-  -> Bool
-hasLeft =
-  error "todo: Course.ListZipper#hasLeft"
+hasLeft :: ListZipper a -> Bool
+hasLeft (ListZipper l _ _) = isEmpty l
 
 -- | Returns whether there are values to the right of focus.
 --
