@@ -192,11 +192,8 @@ hasLeft (ListZipper l _ _) = isEmpty l
 --
 -- >>> hasRight (zipper [1,0] 2 [])
 -- False
-hasRight ::
-  ListZipper a
-  -> Bool
-hasRight =
-  error "todo: Course.ListZipper#hasRight"
+hasRight :: ListZipper a -> Bool
+hasRight (ListZipper _ _ r) = isEmpty r
 
 -- | Seek to the left for a location matching a predicate, starting from the
 -- current one.
@@ -219,13 +216,10 @@ hasRight =
 --
 -- >>> findLeft (== 1) (zipper [3, 4, 1, 5] 9 [2, 7])
 -- [5] >1< [4,3,9,2,7]
-findLeft ::
-  (a -> Bool)
-  -> ListZipper a
-  -> MaybeListZipper a
-findLeft =
+findLeft :: (a -> Bool) -> ListZipper a -> MaybeListZipper a
+findLeft pred (ListZipper l m r) =
   error "todo: Course.ListZipper#findLeft"
-    
+
 -- | Seek to the right for a location matching a predicate, starting from the
 -- current one.
 --
