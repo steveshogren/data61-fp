@@ -123,26 +123,17 @@ asZipper :: (ListZipper a -> ListZipper a) -> MaybeListZipper a -> MaybeListZipp
 asZipper f =
   asMaybeZipper (IsZ . f)
 
-(>$>)::
-  (ListZipper a -> ListZipper a)
-  -> MaybeListZipper a
-  -> MaybeListZipper a
+(>$>):: (ListZipper a -> ListZipper a) -> MaybeListZipper a -> MaybeListZipper a
 (>$>) =
   asZipper
 
-asMaybeZipper ::
-  (ListZipper a -> MaybeListZipper a)
-  -> MaybeListZipper a
-  -> MaybeListZipper a
+asMaybeZipper :: (ListZipper a -> MaybeListZipper a) -> MaybeListZipper a -> MaybeListZipper a
 asMaybeZipper _ IsNotZ =
   IsNotZ
 asMaybeZipper f (IsZ z) =
   f z
 
-(-<<) ::
-  (ListZipper a -> MaybeListZipper a)
-  -> MaybeListZipper a
-  -> MaybeListZipper a
+(-<<) :: (ListZipper a -> MaybeListZipper a) -> MaybeListZipper a -> MaybeListZipper a
 (-<<) =
   asMaybeZipper
 
@@ -183,7 +174,7 @@ setFocus a lz = withFocus (const a) lz
 -- >>> hasLeft (zipper [] 0 [1,2])
 -- False
 hasLeft :: ListZipper a -> Bool
-hasLeft (ListZipper l _ _) = isEmpty l
+hasLeft (ListZipper l _ _) = not $ isEmpty l
 
 -- | Returns whether there are values to the right of focus.
 --
@@ -193,7 +184,7 @@ hasLeft (ListZipper l _ _) = isEmpty l
 -- >>> hasRight (zipper [1,0] 2 [])
 -- False
 hasRight :: ListZipper a -> Bool
-hasRight (ListZipper _ _ r) = isEmpty r
+hasRight (ListZipper _ _ r) = not $ isEmpty r
 
 -- | Seek to the left for a location matching a predicate, starting from the
 -- current one.
@@ -216,9 +207,14 @@ hasRight (ListZipper _ _ r) = isEmpty r
 --
 -- >>> findLeft (== 1) (zipper [3, 4, 1, 5] 9 [2, 7])
 -- [5] >1< [4,3,9,2,7]
+
+
 findLeft :: (a -> Bool) -> ListZipper a -> MaybeListZipper a
 findLeft pred (ListZipper l m r) =
-  error "todo: Course.ListZipper#findLeft"
+  let (pop, keep) = break pred l
+  in case keep of
+       Nil -> IsNotZ
+       (mid:.left) -> IsZ $ (ListZipper left mid (pop++(m:.r)))
 
 -- | Seek to the right for a location matching a predicate, starting from the
 -- current one.

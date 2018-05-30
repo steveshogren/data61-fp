@@ -308,63 +308,43 @@ notReverse = id
 
 ---- End of list exercises
 
-largeList ::
-  List Int
+largeList :: List Int
 largeList =
   listh [1..50000]
 
-hlist ::
-  List a
-  -> [a]
+hlist :: List a -> [a]
 hlist =
   foldRight (:) []
 
-listh ::
-  [a]
-  -> List a
+listh :: [a] -> List a
 listh =
   P.foldr (:.) Nil
 
-putStr ::
-  Chars
-  -> IO ()
+putStr :: Chars -> IO ()
 putStr =
   P.putStr . hlist
 
-putStrLn ::
-  Chars
-  -> IO ()
+putStrLn :: Chars -> IO ()
 putStrLn =
   P.putStrLn . hlist
 
-readFile ::
-  FilePath
-  -> IO Chars
+readFile :: FilePath -> IO Chars
 readFile =
   P.fmap listh . P.readFile . hlist
 
-writeFile ::
-  FilePath
-  -> Chars
-  -> IO ()
+writeFile :: FilePath -> Chars -> IO ()
 writeFile n s =
   P.writeFile (hlist n) (hlist s)
 
-getLine ::
-  IO Chars
+getLine :: IO Chars
 getLine =
   P.fmap listh P.getLine
 
-getArgs ::
-  IO (List Chars)
+getArgs :: IO (List Chars)
 getArgs =
   P.fmap (listh . P.fmap listh) E.getArgs
 
-isPrefixOf ::
-  Eq a =>
-  List a
-  -> List a
-  -> Bool
+isPrefixOf :: Eq a => List a -> List a -> Bool
 isPrefixOf Nil _ =
   True
 isPrefixOf _  Nil =
@@ -372,32 +352,21 @@ isPrefixOf _  Nil =
 isPrefixOf (x:.xs) (y:.ys) =
   x == y && isPrefixOf xs ys
 
-isEmpty ::
-  List a
-  -> Bool
+isEmpty :: List a -> Bool
 isEmpty Nil =
   True
 isEmpty (_:._) =
   False
 
-span ::
-  (a -> Bool)
-  -> List a
-  -> (List a, List a)
+span :: (a -> Bool) -> List a -> (List a, List a)
 span p x =
   (takeWhile p x, dropWhile p x)
 
-break ::
-  (a -> Bool)
-  -> List a
-  -> (List a, List a)
+break :: (a -> Bool) -> List a -> (List a, List a)
 break p =
   span (not . p)
 
-dropWhile ::
-  (a -> Bool)
-  -> List a
-  -> List a
+dropWhile :: (a -> Bool) -> List a -> List a
 dropWhile _ Nil =
   Nil
 dropWhile p xs@(x:.xs') =
@@ -407,73 +376,47 @@ dropWhile p xs@(x:.xs') =
     else
       xs
 
-takeWhile ::
-  (a -> Bool)
-  -> List a
-  -> List a
-takeWhile _ Nil =
-  Nil
+takeWhile :: (a -> Bool) -> List a -> List a
+takeWhile _ Nil = Nil
 takeWhile p (x:.xs) =
-  if p x
-    then
+  if p x then
       x :. takeWhile p xs
-    else
+  else
       Nil
 
-zip ::
-  List a
-  -> List b
-  -> List (a, b)
+zip :: List a -> List b -> List (a, b)
 zip =
   zipWith (,)
 
-zipWith ::
-  (a -> b -> c)
-  -> List a
-  -> List b
-  -> List c
+zipWith :: (a -> b -> c) -> List a -> List b -> List c
 zipWith f (a:.as) (b:.bs) =
   f a b :. zipWith f as bs
 zipWith _ _  _ =
   Nil
 
-unfoldr ::
-  (a -> Optional (b, a))
-  -> a
-  -> List b
+unfoldr :: (a -> Optional (b, a)) -> a -> List b
 unfoldr f b  =
   case f b of
     Full (a, z) -> a :. unfoldr f z
     Empty -> Nil
 
-lines ::
-  Chars
-  -> List Chars
+lines :: Chars -> List Chars
 lines =
   listh . P.fmap listh . P.lines . hlist
 
-unlines ::
-  List Chars
-  -> Chars
+unlines :: List Chars -> Chars
 unlines =
   listh . P.unlines . hlist . map hlist
 
-words ::
-  Chars
-  -> List Chars
+words :: Chars -> List Chars
 words =
   listh . P.fmap listh . P.words . hlist
 
-unwords ::
-  List Chars
-  -> Chars
+unwords :: List Chars -> Chars
 unwords =
   listh . P.unwords . hlist . map hlist
 
-listOptional ::
-  (a -> Optional b)
-  -> List a
-  -> List b
+listOptional :: (a -> Optional b) -> List a -> List b
 listOptional _ Nil =
   Nil
 listOptional f (h:.t) =
@@ -482,50 +425,31 @@ listOptional f (h:.t) =
        Empty -> r
        Full q -> q :. r
 
-any ::
-  (a -> Bool)
-  -> List a
-  -> Bool
+any :: (a -> Bool) -> List a -> Bool
 any p =
   foldRight ((||) . p) False
 
-all ::
-  (a -> Bool)
-  -> List a
-  -> Bool
+all :: (a -> Bool) -> List a -> Bool
 all p =
   foldRight ((&&) . p) True
 
-or ::
-  List Bool
-  -> Bool
+or :: List Bool -> Bool
 or =
   any id
 
-and ::
-  List Bool
-  -> Bool
+and :: List Bool -> Bool
 and =
   all id
 
-elem ::
-  Eq a =>
-  a
-  -> List a
-  -> Bool
+elem :: Eq a => a -> List a -> Bool
 elem x =
   any (== x)
 
-notElem ::
-  Eq a =>
-  a
-  -> List a
-  -> Bool
+notElem :: Eq a => a -> List a -> Bool
 notElem x =
   all (/= x)
 
-permutations
-  :: List a -> List (List a)
+permutations :: List a -> List (List a)
 permutations xs0 =
   let perms Nil _ =
         Nil
@@ -538,19 +462,11 @@ permutations xs0 =
         in foldRight (\xs -> snd . interleave' id xs) (perms ts (t:.is)) (permutations is)
   in xs0 :. perms xs0 Nil
 
-intersectBy ::
-  (a -> b -> Bool)
-  -> List a
-  -> List b
-  -> List a
+intersectBy :: (a -> b -> Bool) -> List a -> List b -> List a
 intersectBy e xs ys =
   filter (\x -> any (e x) ys) xs
 
-take ::
-  (Num n, Ord n) =>
-  n
-  -> List a
-  -> List a
+take :: (Num n, Ord n) => n -> List a -> List a
 take n _  | n <= 0 =
   Nil
 take _ Nil =
