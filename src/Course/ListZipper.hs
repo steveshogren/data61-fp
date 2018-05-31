@@ -214,7 +214,7 @@ findLeft pred (ListZipper l m r) =
   let (pop, keep) = break pred l
   in case keep of
        Nil -> IsNotZ
-       (mid:.left) -> IsZ $ (ListZipper left mid (pop++(m:.r)))
+       (mid:.left) -> IsZ $ (ListZipper left mid ((reverse pop)++(m:.r)))
 
 -- | Seek to the right for a location matching a predicate, starting from the
 -- current one.
@@ -234,12 +234,12 @@ findLeft pred (ListZipper l m r) =
 --
 -- >>> findRight (== 1) (zipper [2, 3] 1 [1, 4, 5, 1])
 -- [1,2,3] >1< [4,5,1]
-findRight ::
-  (a -> Bool)
-  -> ListZipper a
-  -> MaybeListZipper a
-findRight =
-  error "todo: Course.ListZipper#findRight"
+findRight :: (a -> Bool) -> ListZipper a -> MaybeListZipper a
+findRight pred (ListZipper l m r) =
+  let (pop, keep) = break pred r
+  in case keep of
+       Nil -> IsNotZ
+       (mid:.right) -> IsZ $ (ListZipper ((reverse (m:.pop))++l) mid right)
 
 -- | Move the zipper left, or if there are no elements to the left, go to the far right.
 --
