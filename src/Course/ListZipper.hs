@@ -248,11 +248,12 @@ findRight pred (ListZipper l m r) =
 --
 -- >>> moveLeftLoop (zipper [] 1 [2,3,4])
 -- [3,2,1] >4< []
-moveLeftLoop ::
-  ListZipper a
-  -> ListZipper a
-moveLeftLoop =
-  error "todo: Course.ListZipper#moveLeftLoop"
+moveLeftLoop :: ListZipper a -> ListZipper a
+moveLeftLoop lz@(ListZipper Nil _ Nil) = lz
+moveLeftLoop (ListZipper (newMid:.ls) m r) = (ListZipper ls newMid (m:.r))
+moveLeftLoop (ListZipper Nil m r) =
+  let (newMid:.newLeft) = reverse (m:.r)
+  in (ListZipper newLeft newMid Nil)
 
 -- | Move the zipper right, or if there are no elements to the right, go to the far left.
 --
@@ -261,11 +262,12 @@ moveLeftLoop =
 --
 -- >>> moveRightLoop (zipper [3,2,1] 4 [])
 -- [] >1< [2,3,4]
-moveRightLoop ::
-  ListZipper a
-  -> ListZipper a
-moveRightLoop =
-  error "todo: Course.ListZipper#moveRightLoop"
+moveRightLoop :: ListZipper a -> ListZipper a
+moveRightLoop lz@(ListZipper Nil _ Nil) = lz
+moveRightLoop (ListZipper l m (newMid:.r)) = (ListZipper (m:.l) newMid r)
+moveRightLoop (ListZipper l m Nil) =
+  let (newMid:.newRight) = reverse (m:.l)
+  in (ListZipper Nil newMid newRight)
 
 -- | Move the zipper one position to the left.
 --
@@ -274,11 +276,9 @@ moveRightLoop =
 --
 -- >>> moveLeft (zipper [] 1 [2,3,4])
 -- ><
-moveLeft ::
-  ListZipper a
-  -> MaybeListZipper a
-moveLeft =
-  error "todo: Course.ListZipper#moveLeft"
+moveLeft :: ListZipper a -> MaybeListZipper a
+moveLeft (ListZipper Nil _ _) = IsNotZ
+moveLeft (ListZipper (newMid:.ls) m r) = IsZ (ListZipper ls newMid (m:.r))
 
 -- | Move the zipper one position to the right.
 --
@@ -287,11 +287,9 @@ moveLeft =
 --
 -- >>> moveRight (zipper [3,2,1] 4 [])
 -- ><
-moveRight ::
-  ListZipper a
-  -> MaybeListZipper a
-moveRight =
-  error "todo: Course.ListZipper#moveRight"
+moveRight :: ListZipper a -> MaybeListZipper a
+moveRight (ListZipper _ _ Nil) = IsNotZ
+moveRight (ListZipper l m (newMid:.r)) = IsZ (ListZipper (m:.l) newMid r)
 
 -- | Swap the current focus with the value to the left of focus.
 --

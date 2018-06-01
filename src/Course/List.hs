@@ -467,84 +467,52 @@ intersectBy e xs ys =
   filter (\x -> any (e x) ys) xs
 
 take :: (Num n, Ord n) => n -> List a -> List a
-take n _  | n <= 0 =
-  Nil
-take _ Nil =
-  Nil
+take n _  | n <= 0 = Nil
+take _ Nil = Nil
 take n (x:.xs) =
   x :. take (n - 1) xs
 
-drop ::
-  (Num n, Ord n) =>
-  n
-  -> List a
-  -> List a
-drop n xs | n <= 0 =
-  xs
-drop _ Nil =
-  Nil
+drop :: (Num n, Ord n) => n -> List a -> List a
+drop n xs | n <= 0 = xs
+drop _ Nil = Nil
 drop n (_:.xs) =
   drop (n-1) xs
 
-repeat ::
-  a
-  -> List a
+repeat :: a -> List a
 repeat x =
   x :. repeat x
 
-replicate ::
-  (Num n, Ord n) =>
-  n
-  -> a
-  -> List a
+replicate :: (Num n, Ord n) => n -> a -> List a
 replicate n x =
   take n (repeat x)
 
-reads ::
-  P.Read a =>
-  Chars
-  -> Optional (a, Chars)
+reads :: P.Read a => Chars -> Optional (a, Chars)
 reads s =
   case P.reads (hlist s) of
     [] -> Empty
     ((a, q):_) -> Full (a, listh q)
 
-read ::
-  P.Read a =>
-  Chars
-  -> Optional a
+read :: P.Read a => Chars -> Optional a
 read =
   mapOptional fst . reads
 
-readHexs ::
-  (Eq a, Num a) =>
-  Chars
-  -> Optional (a, Chars)
+readHexs :: (Eq a, Num a) => Chars -> Optional (a, Chars)
 readHexs s =
   case N.readHex (hlist s) of
     [] -> Empty
     ((a, q):_) -> Full (a, listh q)
 
-readHex ::
-  (Eq a, Num a) =>
-  Chars
-  -> Optional a
+readHex :: (Eq a, Num a) => Chars -> Optional a
 readHex =
   mapOptional fst . readHexs
 
-readFloats ::
-  (RealFrac a) =>
-  Chars
-  -> Optional (a, Chars)
+readFloats :: (RealFrac a) => Chars -> Optional (a, Chars)
 readFloats s =
   case N.readSigned N.readFloat (hlist s) of
     [] -> Empty
     ((a, q):_) -> Full (a, listh q)
 
-readFloat ::
-  (RealFrac a) =>
-  Chars
-  -> Optional a
+readFloat :: (RealFrac a) => Chars -> Optional a
 readFloat =
   mapOptional fst . readFloats
 
