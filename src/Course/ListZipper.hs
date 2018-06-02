@@ -298,11 +298,9 @@ moveRight (ListZipper l m (newMid:.r)) = IsZ (ListZipper (m:.l) newMid r)
 --
 -- >>> swapLeft (zipper [] 1 [2,3,4])
 -- ><
-swapLeft ::
-  ListZipper a
-  -> MaybeListZipper a
-swapLeft =
-  error "todo: Course.ListZipper#swapLeft"
+swapLeft :: ListZipper a -> MaybeListZipper a
+swapLeft (ListZipper Nil _ _) = IsNotZ
+swapLeft (ListZipper (newMid:.ls) m r) = IsZ (ListZipper (m:.ls) newMid r)
 
 -- | Swap the current focus with the value to the right of focus.
 --
@@ -311,11 +309,9 @@ swapLeft =
 --
 -- >>> swapRight (zipper [3,2,1] 4 [])
 -- ><
-swapRight ::
-  ListZipper a
-  -> MaybeListZipper a
-swapRight =
-  error "todo: Course.ListZipper#swapRight"
+swapRight :: ListZipper a -> MaybeListZipper a
+swapRight (ListZipper _ _ Nil) = IsNotZ
+swapRight (ListZipper l m (newMid:.r)) = IsZ (ListZipper l newMid (m:.r))
 
 -- | Drop all values to the left of the focus.
 --
