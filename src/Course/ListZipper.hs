@@ -322,11 +322,8 @@ swapRight (ListZipper l m (newMid:.r)) = IsZ (ListZipper l newMid (m:.r))
 -- [] >1< [2,3,4]
 --
 -- prop> \l x r -> dropLefts (zipper l x r) == zipper [] x r
-dropLefts ::
-  ListZipper a
-  -> ListZipper a
-dropLefts =
-  error "todo: Course.ListZipper#dropLefts"
+dropLefts :: ListZipper a -> ListZipper a
+dropLefts (ListZipper _ m r) = ListZipper Nil m r
 
 -- | Drop all values to the right of the focus.
 --
@@ -337,11 +334,8 @@ dropLefts =
 -- [3,2,1] >4< []
 --
 -- prop> \l x r -> dropRights (zipper l x r) == zipper l x []
-dropRights ::
-  ListZipper a
-  -> ListZipper a
-dropRights =
-  error "todo: Course.ListZipper#dropRights"
+dropRights :: ListZipper a -> ListZipper a
+dropRights (ListZipper l m _) = ListZipper l m Nil
 
 -- | Move the focus left the given number of positions. If the value is negative, move right instead.
 --
