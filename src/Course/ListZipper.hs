@@ -344,12 +344,21 @@ dropRights (ListZipper l m _) = ListZipper l m Nil
 --
 -- >>> moveLeftN (-1) $ zipper [2,1,0] 3 [4,5,6]
 -- [3,2,1,0] >4< [5,6]
-moveLeftN ::
-  Int
-  -> ListZipper a
-  -> MaybeListZipper a
-moveLeftN =
-  error "todo: Course.ListZipper#moveLeftN"
+
+-- moveLeft (ListZipper Nil _ _) = IsNotZ
+-- moveLeft (ListZipper (newMid:.ls) m r) = IsZ (ListZipper ls newMid (m:.r))
+
+moveLeftN :: Int -> ListZipper a -> MaybeListZipper a
+moveLeftN 0 l = IsZ l
+moveLeftN x lz@(ListZipper Nil _ _ )
+  | x > 0 = IsNotZ
+  | x < 0 = moveRightN ((-1) * x) lz
+moveLeftN x lz@(ListZipper (l:.ls) m r)
+  | x > 0 = moveLeftN (x - 1) (ListZipper ls l (m:.r))
+  | x < 0 = moveRightN ((-1) * x) lz
+
+  -- | x > 0 = ((moveLeftN (x-1)) <$> (moveLeft l))
+  -- | x < 0 = sequenceA $ (moveLeftN (x+1)) <$> (moveRight l)
 
 -- | Move the focus right the given number of positions. If the value is negative, move left instead.
 --
@@ -358,12 +367,14 @@ moveLeftN =
 --
 -- >>> moveRightN (-1) $ zipper [2,1,0] 3 [4,5,6]
 -- [1,0] >2< [3,4,5,6]
-moveRightN ::
-  Int
-  -> ListZipper a
-  -> MaybeListZipper a
-moveRightN =
-  error "todo: Course.ListZipper#moveRightN"
+moveRightN :: Int -> ListZipper a -> MaybeListZipper a
+moveRightN 0 l = IsZ l
+moveRightN x lz@(ListZipper _ _ Nil)
+  | x > 0 = IsNotZ
+  | x < 0 = moveLeftN ((-1) * x) lz
+moveRightN x lz@(ListZipper l m (r:.rs))
+  | x > 0 = moveRightN (x - 1) (ListZipper (m:.l) r rs)
+  | x < 0 = moveLeftN ((-1) * x) lz
 
 -- | Move the focus left the given number of positions. If the value is negative, move right instead.
 -- If the focus cannot be moved, the given number of times, return the value by which it can be moved instead.
@@ -544,11 +555,14 @@ insertPushRight =
 --
 -- >>> zipper [(+2), (+10)] (*2) [(*3), (4*), (5+)] <*> zipper [3,2,1] 4 [5,6,7]
 -- [5,12] >8< [15,24,12]
+
 instance Applicative ListZipper where
 -- /Tip:/ Use @List#repeat@.
+  pure :: a -> ListZipper a
   pure =
     error "todo: Course.ListZipper pure#instance ListZipper"
 -- /Tip:/ Use `zipWith`
+  (<*>) :: ListZipper (a -> b) -> ListZipper a -> ListZipper b
   (<*>) =
     error "todo: Course.ListZipper (<*>)#instance ListZipper"
 
