@@ -12,6 +12,7 @@ import Course.Applicative
 import Course.Extend
 import Course.Comonad
 import Course.Traversable
+import Course.StateT as ST
 import qualified Prelude as P
 
 -- $setup
@@ -356,6 +357,7 @@ moveLeftN x lz@(ListZipper Nil _ _ )
 moveLeftN x lz@(ListZipper (l:.ls) m r)
   | x > 0 = moveLeftN (x - 1) (ListZipper ls l (m:.r))
   | x < 0 = moveRightN ((-1) * x) lz
+moveLeftN _ _ = IsNotZ
 
   -- | x > 0 = ((moveLeftN (x-1)) <$> (moveLeft l))
   -- | x < 0 = sequenceA $ (moveLeftN (x+1)) <$> (moveRight l)
@@ -375,6 +377,7 @@ moveRightN x lz@(ListZipper _ _ Nil)
 moveRightN x lz@(ListZipper l m (r:.rs))
   | x > 0 = moveRightN (x - 1) (ListZipper (m:.l) r rs)
   | x < 0 = moveLeftN ((-1) * x) lz
+moveRightN _ _ = IsNotZ
 
 -- | Move the focus left the given number of positions. If the value is negative, move right instead.
 -- If the focus cannot be moved, the given number of times, return the value by which it can be moved instead.
@@ -399,12 +402,27 @@ moveRightN x lz@(ListZipper l m (r:.rs))
 --
 -- >>> moveLeftN' (-4) (zipper [5,4,3,2,1] 6 [7,8,9])
 -- Left 3
-moveLeftN' ::
-  Int
-  -> ListZipper a
-  -> Either Int (ListZipper a)
-moveLeftN' =
-  error "todo: Course.ListZipper#moveLeftN'"
+
+moveLeftHelper :: (Ord a, Num a) => ListZipper b -> a -> a -> Either a (ListZipper b)
+moveLeftHelper lz 0 _ = Right lz
+moveLeftHelper lz remaining made =
+  case moveLeft lz of
+    IsNotZ -> Left made
+    IsZ lz' -> moveLeftHelper lz' (remaining - 1) (made + 1)
+
+moveRightHelper :: (Ord a, Num a) => ListZipper b -> a -> a -> Either a (ListZipper b)
+moveRightHelper lz 0 _ = Right lz
+moveRightHelper lz remaining made =
+  case moveRight lz of
+    IsNotZ -> Left made
+    IsZ lz' -> moveRightHelper lz' (remaining - 1) (made + 1)
+
+moveLeftN' :: Int -> ListZipper a -> Either Int (ListZipper a)
+moveLeftN' 0 l = Right l
+moveLeftN' x l
+  | x > 0 = moveLeftHelper l x 0
+  | x < 0 = moveRightN' (x*(-1)) l
+moveLeftN' _ _ = Left 0
 
 -- | Move the focus right the given number of positions. If the value is negative, move left instead.
 -- If the focus cannot be moved, the given number of times, return the value by which it can be moved instead.
