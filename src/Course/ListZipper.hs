@@ -441,12 +441,12 @@ moveLeftN' _ _ = Left 0
 --
 -- >>> moveRightN' (-4) (zipper [3,2,1] 4 [5,6,7])
 -- Left 3
-moveRightN' ::
-  Int
-  -> ListZipper a
-  -> Either Int (ListZipper a)
-moveRightN' =
-  error "todo: Course.ListZipper#moveRightN'"
+moveRightN' :: Int -> ListZipper a -> Either Int (ListZipper a)
+moveRightN' 0 l = Right l
+moveRightN' x l
+  | x > 0 = moveRightHelper l x 0
+  | x < 0 = moveLeftN' (x*(-1)) l
+moveRightN' _ _ = Left 0
 
 -- | Move the focus to the given absolute position in the zipper. Traverse the zipper only to the extent required.
 --
