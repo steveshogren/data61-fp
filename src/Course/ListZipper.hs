@@ -458,12 +458,11 @@ moveRightN' _ _ = Left 0
 --
 -- >>> nth 8 (zipper [3,2,1] 4 [5,6,7])
 -- ><
-nth ::
-  Int
-  -> ListZipper a
-  -> MaybeListZipper a
-nth =
-  error "todo: Course.ListZipper#nth"
+nth :: Int -> ListZipper a -> MaybeListZipper a
+nth idx lz@(ListZipper l _ _) =
+  let currentIdx = length l
+      moves = idx - currentIdx
+  in moveRightN moves lz
 
 -- | Return the absolute position of the current focus in the zipper.
 --
