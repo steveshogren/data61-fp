@@ -470,11 +470,8 @@ nth idx lz@(ListZipper l _ _) =
 -- 3
 --
 -- prop> \i z z' -> optional True (\z' -> index z' == i) (toOptional (nth i z))
-index ::
-  ListZipper a
-  -> Int
-index =
-  error "todo: Course.ListZipper#index"
+index :: ListZipper a -> Int
+index (ListZipper l _ _) = length l
 
 -- | Move the focus to the end of the zipper.
 --
@@ -484,11 +481,11 @@ index =
 -- prop> \lz -> toList lz == toList (end lz)
 --
 -- prop> \lz -> rights (end lz) == Nil
-end ::
-  ListZipper a
-  -> ListZipper a
-end =
-  error "todo: Course.ListZipper#end"
+end :: ListZipper a -> ListZipper a
+end lz@(ListZipper _ _ r) =
+  case moveRightN (length r) lz of
+    IsNotZ -> error ""
+    IsZ lz' -> lz'
 
 -- | Move the focus to the start of the zipper.
 --
