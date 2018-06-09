@@ -495,11 +495,11 @@ end lz@(ListZipper _ _ r) =
 -- prop> \lz -> toList lz == toList (start lz)
 --
 -- prop> \lz -> lefts (start lz) == Nil
-start ::
-  ListZipper a
-  -> ListZipper a
-start =
-  error "todo: Course.ListZipper#start"
+start :: ListZipper a -> ListZipper a
+start lz@(ListZipper l _ _) =
+  case moveLeftN (length l) lz of
+    IsNotZ -> error ""
+    IsZ lz' -> lz'
 
 -- | Delete the current focus and pull the left values to take the empty position.
 --
@@ -508,10 +508,8 @@ start =
 --
 -- >>> deletePullLeft (zipper [] 1 [2,3,4])
 -- ><
-deletePullLeft ::
-  ListZipper a
-  -> MaybeListZipper a
-deletePullLeft =
+deletePullLeft :: ListZipper a -> MaybeListZipper a
+deletePullLeft lz@(ListZipper l _ r) =
   error "todo: Course.ListZipper#deletePullLeft"
 
 -- | Delete the current focus and pull the right values to take the empty position.
