@@ -509,8 +509,8 @@ start lz@(ListZipper l _ _) =
 -- >>> deletePullLeft (zipper [] 1 [2,3,4])
 -- ><
 deletePullLeft :: ListZipper a -> MaybeListZipper a
-deletePullLeft lz@(ListZipper l _ r) =
-  error "todo: Course.ListZipper#deletePullLeft"
+deletePullLeft (ListZipper Nil _ _) = IsNotZ
+deletePullLeft (ListZipper (newMid:.l) _ r) = IsZ (ListZipper l newMid r)
 
 -- | Delete the current focus and pull the right values to take the empty position.
 --
@@ -519,11 +519,9 @@ deletePullLeft lz@(ListZipper l _ r) =
 --
 -- >>> deletePullRight (zipper [3,2,1] 4 [])
 -- ><
-deletePullRight ::
-  ListZipper a
-  -> MaybeListZipper a
-deletePullRight =
-  error "todo: Course.ListZipper#deletePullRight"
+deletePullRight :: ListZipper a -> MaybeListZipper a
+deletePullRight (ListZipper _ _ Nil) = IsNotZ
+deletePullRight (ListZipper l _ (newMid:.r)) = IsZ (ListZipper l newMid r)
 
 -- | Insert at the current focus and push the left values to make way for the new position.
 --
