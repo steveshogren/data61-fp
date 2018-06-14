@@ -561,7 +561,6 @@ insertPushRight newMid (ListZipper l m r) = ListZipper l newMid (m:.r)
 instance Applicative ListZipper where
   pure :: a -> ListZipper a
   pure a = ListZipper (repeat a) a (repeat a)
--- /Tip:/ Use `zipWith`
   (<*>) :: ListZipper (a -> b) -> ListZipper a -> ListZipper b
   (<*>) (ListZipper fl fm fr) (ListZipper l m r) =
     ListZipper (zipWith (\f a -> f a) fl l)
@@ -600,12 +599,19 @@ instance Applicative MaybeListZipper where
 -- This implementation "visits" every possible zipper value derivable from a given zipper (i.e. all zippers to the left and right).
 --
 -- /Tip:/ Use @List#unfoldr@.
+-- unfoldr :: (a -> Optional (b, a)) -> a -> List b
 --
 -- >>> id <<= (zipper [2,1] 3 [4,5])
 -- [[1] >2< [3,4,5],[] >1< [2,3,4,5]] >[2,1] >3< [4,5]< [[3,2,1] >4< [5],[4,3,2,1] >5< []]
 instance Extend ListZipper where
-  (<<=) =
-    error "todo: Course.ListZipper (<<=)#instance ListZipper"
+  (<<=) :: (ListZipper a -> b) -> ListZipper a -> ListZipper b
+  (<<=) f lz =
+    ListZipper
+     (unfoldr (\lz1 -> let lz1' = toOptional $ moveLeft lz1
+                       in  (\lz2' -> (f lz2',lz2')) <$> lz1') lz)
+     (f lz)
+     (unfoldr (\lz1 -> let lz1' = toOptional $ moveRight lz1
+                       in  (\lz2' -> (f lz2',lz2')) <$> lz1') lz)
 
 -- | Implement the `Extend` instance for `MaybeListZipper`.
 -- This instance will use the `Extend` instance for `ListZipper`.
