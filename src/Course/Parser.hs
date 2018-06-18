@@ -40,7 +40,7 @@ instance Show a => Show (ParseResult a) where
     stringconcat ["Unexpected string: ", show s]
   show (Result i a) =
     stringconcat ["Result >", hlist i, "< ", show a]
-  
+
 instance Functor ParseResult where
   _ <$> UnexpectedEof =
     UnexpectedEof
@@ -54,61 +54,36 @@ instance Functor ParseResult where
     Result i (f a)
 
 -- Function to determine is a parse result is an error.
-isErrorResult ::
-  ParseResult a
-  -> Bool
-isErrorResult (Result _ _) =
-  False
-isErrorResult UnexpectedEof =
-  True
-isErrorResult (ExpectedEof _) =
-  True
-isErrorResult (UnexpectedChar _) =
-  True
-isErrorResult (UnexpectedString _) =
-  True
+isErrorResult :: ParseResult a -> Bool
+isErrorResult (Result _ _) = False
+isErrorResult UnexpectedEof = True
+isErrorResult (ExpectedEof _) = True
+isErrorResult (UnexpectedChar _) = True
+isErrorResult (UnexpectedString _) = True
 
 -- | Runs the given function on a successful parse result. Otherwise return the same failing parse result.
-onResult ::
-  ParseResult a
-  -> (Input -> a -> ParseResult b)
-  -> ParseResult b
-onResult UnexpectedEof _ = 
-  UnexpectedEof
-onResult (ExpectedEof i) _ = 
-  ExpectedEof i
-onResult (UnexpectedChar c) _ = 
-  UnexpectedChar c
-onResult (UnexpectedString s)  _ = 
-  UnexpectedString s
-onResult (Result i a) k = 
-  k i a
+onResult :: ParseResult a -> (Input -> a -> ParseResult b) -> ParseResult b
+onResult UnexpectedEof _ = UnexpectedEof
+onResult (ExpectedEof i) _ = ExpectedEof i
+onResult (UnexpectedChar c) _ = UnexpectedChar c
+onResult (UnexpectedString s)  _ = UnexpectedString s
+onResult (Result i a) k = k i a
 
 data Parser a = P (Input -> ParseResult a)
 
-parse ::
-  Parser a
-  -> Input
-  -> ParseResult a
-parse (P p) =
-  p
+parse :: Parser a -> Input -> ParseResult a
+parse (P p) = p
 
 -- | Produces a parser that always fails with @UnexpectedChar@ using the given character.
-unexpectedCharParser ::
-  Char
-  -> Parser a
-unexpectedCharParser c =
-  P (\_ -> UnexpectedChar c)
+unexpectedCharParser :: Char -> Parser a
+unexpectedCharParser c = P (\_ -> UnexpectedChar c)
 
 --- | Return a parser that always returns the given parse result.
 ---
 --- >>> isErrorResult (parse (constantParser UnexpectedEof) "abc")
 --- True
-constantParser ::
-  ParseResult a
-  -> Parser a
-constantParser =
-  P . const
+constantParser :: ParseResult a -> Parser a
+constantParser = P . const
 
 -- | Return a parser that succeeds with a character off the input or fails with an error if the input is empty.
 --
@@ -117,10 +92,11 @@ constantParser =
 --
 -- >>> isErrorResult (parse character "")
 -- True
-character ::
-  Parser Char
-character =
-  error "todo: Course.Parser#character"
+character :: Parser Char
+character = P (\c ->
+                 case c of
+                   x:.xs -> Result xs x
+                   _ -> UnexpectedEof)
 
 -- | Parsers can map.
 -- Write a Functor instance for a @Parser@.
@@ -128,12 +104,8 @@ character =
 -- >>> parse (toUpper <$> character) "amz"
 -- Result >mz< 'A'
 instance Functor Parser where
-  (<$>) ::
-    (a -> b)
-    -> Parser a
-    -> Parser b
-  (<$>) =
-     error "todo: Course.Parser (<$>)#instance Parser"
+  (<$>) :: (a -> b) -> Parser a -> Parser b
+  (<$>) f pa = P (\x -> f <$> parse pa x)
 
 -- | Return a parser that always succeeds with the given value and consumes no input.
 --
