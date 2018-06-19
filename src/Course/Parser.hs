@@ -111,11 +111,8 @@ instance Functor Parser where
 --
 -- >>> parse (valueParser 3) "abc"
 -- Result >abc< 3
-valueParser ::
-  a
-  -> Parser a
-valueParser =
-  error "todo: Course.Parser#valueParser"
+valueParser :: a -> Parser a
+valueParser x = P (\rest -> Result rest x)
 
 -- | Return a parser that tries the first parser for a successful value.
 --
@@ -134,12 +131,10 @@ valueParser =
 --
 -- >>> parse (constantParser UnexpectedEof ||| valueParser 'v') "abc"
 -- Result >abc< 'v'
-(|||) ::
-  Parser a
-  -> Parser a
-  -> Parser a
-(|||) =
-  error "todo: Course.Parser#(|||)"
+(|||) :: Parser a -> Parser a -> Parser a
+(|||) p1 p2 = P (\x ->
+                   let r1 = parse p1 x
+                   in if isErrorResult r1 then parse p2 x else r1)
 
 infixl 3 |||
 
