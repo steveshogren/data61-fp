@@ -227,11 +227,8 @@ list1 pa = (\pa' -> (\pa'' -> pure (pa':.pa'')) =<< (list pa)) =<< pa
 --
 -- >>> isErrorResult (parse (satisfy isUpper) "abc")
 -- True
-satisfy ::
-  (Char -> Bool)
-  -> Parser Char
-satisfy =
-  error "todo: Course.Parser#satisfy"
+satisfy :: (Char -> Bool) -> Parser Char
+satisfy pred = (\ch -> if pred ch then valueParser ch else unexpectedCharParser ch) =<< character
 
 -- | Return a parser that produces the given character but fails if
 --
@@ -240,10 +237,8 @@ satisfy =
 --   * The produced character is not equal to the given character.
 --
 -- /Tip:/ Use the @satisfy@ function.
-is ::
-  Char -> Parser Char
-is =
-  error "todo: Course.Parser#is"
+is :: Char -> Parser Char
+is c = satisfy (== c)
 
 -- | Return a parser that produces a character between '0' and '9' but fails if
 --
@@ -252,10 +247,8 @@ is =
 --   * The produced character is not a digit.
 --
 -- /Tip:/ Use the @satisfy@ and @Data.Char#isDigit@ functions.
-digit ::
-  Parser Char
-digit =
-  error "todo: Course.Parser#digit"
+digit :: Parser Char
+digit = satisfy isDigit
 
 --
 -- | Return a parser that produces a space character but fails if
