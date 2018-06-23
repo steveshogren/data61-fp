@@ -78,6 +78,9 @@ parse (P p) = p
 unexpectedCharParser :: Char -> Parser a
 unexpectedCharParser c = P (\_ -> UnexpectedChar c)
 
+unexpectedStringParser :: Chars -> Parser a
+unexpectedStringParser c = P (\_ -> UnexpectedString c)
+
 --- | Return a parser that always returns the given parse result.
 ---
 --- >>> isErrorResult (parse (constantParser UnexpectedEof) "abc")
@@ -379,10 +382,13 @@ firstNameParser = (\x -> (\xs -> valueParser (x:.xs)) =<< (list lower)) =<< uppe
 --
 -- >>> isErrorResult (parse surnameParser "abc")
 -- True
-surnameParser ::
-  Parser Chars
+
+surnameParser :: Parser Chars
 surnameParser =
-  error "todo: Course.Parser#surnameParser"
+  upper >>=
+  (\ur -> (thisMany 5 lower) >>=
+          (\lo -> (list lower) >>=
+                  (\ex -> valueParser (ur:.(lo++ex)))))
 
 -- | Write a parser for Person.smoker.
 --
@@ -398,10 +404,8 @@ surnameParser =
 --
 -- >>> isErrorResult (parse smokerParser "abc")
 -- True
-smokerParser ::
-  Parser Bool
-smokerParser =
-  error "todo: Course.Parser#smokerParser"
+smokerParser :: Parser Bool
+smokerParser = (is 'y' >>= (\_ -> valueParser True)) ||| (is 'n' >>= (\_ -> valueParser False))
 
 -- | Write part of a parser for Person#phoneBody.
 -- This parser will only produce a string of digits, dots or hyphens.
