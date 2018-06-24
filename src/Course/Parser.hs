@@ -424,10 +424,8 @@ smokerParser = (is 'y' >>= (\_ -> valueParser True)) ||| (is 'n' >>= (\_ -> valu
 --
 -- >>> parse phoneBodyParser "a123-456"
 -- Result >a123-456< ""
-phoneBodyParser ::
-  Parser Chars
-phoneBodyParser =
-  error "todo: Course.Parser#phoneBodyParser"
+phoneBodyParser :: Parser Chars
+phoneBodyParser = list (digit ||| is '-' ||| is '.')
 
 -- | Write a parser for Person.phone.
 --
@@ -446,10 +444,12 @@ phoneBodyParser =
 --
 -- >>> isErrorResult (parse phoneParser "a123-456")
 -- True
-phoneParser ::
-  Parser Chars
+phoneParser :: Parser Chars
 phoneParser =
-  error "todo: Course.Parser#phoneParser"
+  digit >>=
+  (\d -> phoneBodyParser >>=
+    (\b -> is '#' >>=
+      (\h -> valueParser (d:.(b++ pure h)))))
 
 -- | Write a parser for Person.
 --
@@ -500,10 +500,25 @@ phoneParser =
 --
 -- >>> parse personParser "123  Fred   Clarkson    y     123-456.789#"
 -- Result >< Person 123 "Fred" "Clarkson" True "123-456.789"
-personParser ::
-  Parser Person
+
+
+personParser :: Parser Person
 personParser =
-  error "todo: Course.Parser#personParser"
+  (ageParser <* spaces1) >>=
+  (\age -> (firstNameParser <* spaces1) >>=
+    (\firstName -> (surnameParser <* spaces1) >>=
+      (\surname -> (smokerParser <* spaces1) >>=
+        (\smoker -> (phoneParser)>>=
+          (\phone -> valueParser (Person age firstName surname smoker phone))))))
+
+personParser1 :: Parser Person
+personParser1 =
+  ageParser >>=~
+  (\age -> firstNameParser >>=~
+    (\firstName -> surnameParser >>=~
+      (\surname -> smokerParser  >>=~
+        (\smoker ->  phoneParser >>=
+          (\phone -> valueParser (Person age firstName surname smoker phone))))))
 
 -- Make sure all the tests pass!
 
