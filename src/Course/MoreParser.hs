@@ -36,10 +36,8 @@ P p <.> i =
 --
 -- >>> parse spaces "abc"
 -- Result >abc< ""
-spaces ::
-  Parser Chars
-spaces =
-  error "todo: Course.MoreParser#spaces"
+spaces :: Parser Chars
+spaces = list space
 
 -- | Write a function that applies the given parser, then parses 0 or more spaces,
 -- then produces the result of the original parser.
@@ -51,11 +49,8 @@ spaces =
 --
 -- >>> parse (tok (is 'a')) "abc"
 -- Result >bc< 'a'
-tok ::
-  Parser a
-  -> Parser a
-tok =
-  error "todo: Course.MoreParser#tok"
+tok :: Parser a -> Parser a
+tok p = (p <* spaces)
 
 -- | Write a function that parses the given char followed by 0 or more spaces.
 --
@@ -64,13 +59,10 @@ tok =
 --
 -- >>> isErrorResult (parse (charTok 'a') "dabc")
 -- True
--- 
+--
 -- /Tip:/ Use `tok` and `is`.
-charTok ::
-  Char
-  -> Parser Char
-charTok =
-  error "todo: Course.MoreParser#charTok"
+charTok :: Char -> Parser Char
+charTok c = (is c <* spaces)
 
 -- | Write a parser that parses a comma ',' followed by 0 or more spaces.
 --
@@ -79,12 +71,10 @@ charTok =
 --
 -- >>> isErrorResult( parse commaTok "1,23")
 -- True
--- 
+--
 -- /Tip:/ Use `charTok`.
-commaTok ::
-  Parser Char
-commaTok =
-  error "todo: Course.MoreParser#commaTok"
+commaTok :: Parser Char
+commaTok = charTok ','
 
 -- | Write a parser that parses either a double-quote or a single-quote.
 --
