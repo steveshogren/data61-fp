@@ -88,10 +88,8 @@ commaTok = charTok ','
 --
 -- >>> isErrorResult (parse quote "abc")
 -- True
-quote ::
-  Parser Char
-quote =
-  error "todo: Course.MoreParser#quote"
+quote :: Parser Char
+quote = is '\'' ||| is '"'
 
 -- | Write a function that parses the given string (fails otherwise).
 --
@@ -102,11 +100,8 @@ quote =
 --
 -- >>> isErrorResult (parse (string "abc") "bcdef")
 -- True
-string ::
-  Chars
-  -> Parser Chars
-string =
-  error "todo: Course.MoreParser#is"
+string :: Chars -> Parser Chars
+string x = traverse is x
 
 -- | Write a function that parsers the given string, followed by 0 or more spaces.
 --
@@ -117,11 +112,8 @@ string =
 --
 -- >>> isErrorResult (parse (stringTok "abc") "bc  ")
 -- True
-stringTok ::
-  Chars
-  -> Parser Chars
-stringTok =
-  error "todo: Course.MoreParser#stringTok"
+stringTok :: Chars -> Parser Chars
+stringTok x = traverse is x <* spaces
 
 -- | Write a function that tries the given parser, otherwise succeeds by producing the given value.
 --
@@ -132,12 +124,8 @@ stringTok =
 --
 -- >>> parse (option 'x' character) ""
 -- Result >< 'x'
-option ::
-  a
-  -> Parser a
-  -> Parser a
-option =
-  error "todo: Course.MoreParser#option"
+option :: a -> Parser a -> Parser a
+option x p = p ||| valueParser x
 
 -- | Write a parser that parses 1 or more digits.
 --
@@ -148,10 +136,8 @@ option =
 --
 -- >>> isErrorResult (parse digits1 "abc123")
 -- True
-digits1 ::
-  Parser Chars
-digits1 =
-  error "todo: Course.MoreParser#digits1"
+digits1 :: Parser Chars
+digits1 = list1 digit
 
 -- | Write a function that parses one of the characters in the given string.
 --
@@ -162,11 +148,8 @@ digits1 =
 --
 -- >>> isErrorResult (parse (oneof "abc") "def")
 -- True
-oneof ::
-  Chars
-  -> Parser Char
-oneof =
-  error "todo: Course.MoreParser#oneof"
+oneof :: Chars -> Parser Char
+oneof chars = satisfy (\x -> elem x chars)
 
 -- | Write a function that parses any character, but fails if it is in the given string.
 --
