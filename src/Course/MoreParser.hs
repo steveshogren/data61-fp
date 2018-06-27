@@ -160,11 +160,8 @@ oneof chars = satisfy (\x -> elem x chars)
 --
 -- >>> isErrorResult (parse (noneof "abcd") "abc")
 -- True
-noneof ::
-  Chars
-  -> Parser Char
-noneof =
-  error "todo: Course.MoreParser#noneof"
+noneof :: Chars -> Parser Char
+noneof chars = satisfy (\x -> notElem x chars)
 
 -- | Write a function that applies the first parser, runs the third parser keeping the result,
 -- then runs the second parser and produces the obtained result.
@@ -182,13 +179,8 @@ noneof =
 --
 -- >>> isErrorResult (parse (between (is '[') (is ']') character) "abc]")
 -- True
-between ::
-  Parser o
-  -> Parser c
-  -> Parser a
-  -> Parser a
-between =
-  error "todo: Course.MoreParser#between"
+between :: Parser o -> Parser c -> Parser a -> Parser a
+between l r m = l *> m <* r
 
 -- | Write a function that applies the given parser in between the two given characters.
 --
@@ -205,13 +197,8 @@ between =
 --
 -- >>> isErrorResult (parse (betweenCharTok '[' ']' character) "abc]")
 -- True
-betweenCharTok ::
-  Char
-  -> Char
-  -> Parser a
-  -> Parser a
-betweenCharTok =
-  error "todo: Course.MoreParser#betweenCharTok"
+betweenCharTok :: Char -> Char -> Parser a -> Parser a
+betweenCharTok l r m = between (charTok l) (charTok r) m
 
 -- | Write a function that parses 4 hex digits and return the character value.
 --
