@@ -215,10 +215,11 @@ betweenCharTok l r m = between (charTok l) (charTok r) m
 --
 -- >>> isErrorResult (parse hex "0axf")
 -- True
-hex ::
-  Parser Char
-hex =
-  error "todo: Course.MoreParser#hex"
+-- hard
+hex :: Parser Char
+hex = replicateA 4 (satisfy isHexDigit) >>= (\x -> case readHex x of
+                                                     Full hx -> valueParser (chr hx)
+                                                     Empty -> unexpectedStringParser x)
 
 -- | Write a function that parses the character 'u' followed by 4 hex digits and return the character value.
 --
@@ -238,10 +239,8 @@ hex =
 --
 -- >>> isErrorResult (parse hexu "u0axf")
 -- True
-hexu ::
-  Parser Char
-hexu =
-  error "todo: Course.MoreParser#hexu"
+hexu :: Parser Char
+hexu = is 'u' *> hex
 
 -- | Write a function that produces a non-empty list of values coming off the given parser (which must succeed at least once),
 -- separated by the second given parser.
@@ -259,12 +258,10 @@ hexu =
 --
 -- >>> isErrorResult (parse (sepby1 character (is ',')) "")
 -- True
-sepby1 ::
-  Parser a
-  -> Parser s
-  -> Parser (List a)
-sepby1 =
-  error "todo: Course.MoreParser#sepby1"
+-- hard
+sepby1 :: Parser a -> Parser s -> Parser (List a)
+sepby1 p s =
+  p >>= (\p' -> list (s *> p) >>= (\rest -> pure (p' :. rest)))
 
 -- | Write a function that produces a list of values coming off the given parser,
 -- separated by the second given parser.
