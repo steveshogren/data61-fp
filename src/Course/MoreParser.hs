@@ -279,12 +279,8 @@ sepby1 p s =
 --
 -- >>> parse (sepby character (is ',')) "a,b,c,,def"
 -- Result >def< "abc,"
-sepby ::
-  Parser a
-  -> Parser s
-  -> Parser (List a)
-sepby =
-  error "todo: Course.MoreParser#sepby"
+sepby :: Parser a -> Parser s -> Parser (List a)
+sepby p s = sepby1 p s ||| (list (p ||| (s *> p)))
 
 -- | Write a parser that asserts that there is no remaining input.
 --
@@ -293,15 +289,16 @@ sepby =
 --
 -- >>> isErrorResult (parse eof "abc")
 -- True
-eof ::
-  Parser ()
-eof =
-  error "todo: Course.MoreParser#eof"
+eof :: Parser ()
+eof = P (\c -> case c of
+                 _:._ -> UnexpectedString c
+                 _ -> Result Nil ())
 
 -- | Write a parser that produces a character that satisfies all of the given predicates.
 --
 -- /Tip:/ Use `sequence` and @Data.List#and@.
 --
+-- >>> parse (satisfyAll (isUpper :. (/= 'X') :. Nil)) "ABC"
 -- >>> parse (satisfyAll (isUpper :. (/= 'X') :. Nil)) "ABC"
 -- Result >BC< 'A'
 --
