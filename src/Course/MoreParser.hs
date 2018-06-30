@@ -313,11 +313,8 @@ eof = P (\c -> case c of
 --
 -- >>> isErrorResult (parse (satisfyAll (isUpper :. (/= 'X') :. Nil)) "abc")
 -- True
-satisfyAll ::
-  List (Char -> Bool)
-  -> Parser Char
-satisfyAll =
-  error "todo: Course.MoreParser#satisfyAll"
+satisfyAll :: List (Char -> Bool) -> Parser Char
+satisfyAll preds = satisfy (\x -> and ((\p -> p x) <$> preds ))
 
 -- | Write a parser that produces a character that satisfies any of the given predicates.
 --
