@@ -299,7 +299,6 @@ eof = P (\c -> case c of
 -- /Tip:/ Use `sequence` and @Data.List#and@.
 --
 -- >>> parse (satisfyAll (isUpper :. (/= 'X') :. Nil)) "ABC"
--- >>> parse (satisfyAll (isUpper :. (/= 'X') :. Nil)) "ABC"
 -- Result >BC< 'A'
 --
 -- >>> parse (satisfyAll (isUpper :. (/= 'X') :. Nil)) "ABc"
@@ -314,7 +313,7 @@ eof = P (\c -> case c of
 -- >>> isErrorResult (parse (satisfyAll (isUpper :. (/= 'X') :. Nil)) "abc")
 -- True
 satisfyAll :: List (Char -> Bool) -> Parser Char
-satisfyAll preds = satisfy (\x -> and ((\p -> p x) <$> preds ))
+satisfyAll preds = satisfy (\x -> and (map (\p -> p x) preds))
 
 -- | Write a parser that produces a character that satisfies any of the given predicates.
 --
