@@ -330,11 +330,8 @@ satisfyAll preds = satisfy (\x -> and (map (\p -> p x) preds))
 --
 -- >>> isErrorResult (parse (satisfyAny (isLower :. (/= 'X') :. Nil)) "")
 -- True
-satisfyAny ::
-  List (Char -> Bool)
-  -> Parser Char
-satisfyAny =
-  error "todo: Course.MoreParser#satisfyAny"
+satisfyAny :: List (Char -> Bool) -> Parser Char
+satisfyAny preds = satisfy (\x -> or (map (\p -> p x) preds))
 
 -- | Write a parser that parses between the two given characters, separated by a comma character ','.
 --
