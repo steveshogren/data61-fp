@@ -354,10 +354,6 @@ satisfyAny preds = satisfy (\x -> or (map (\p -> p x) preds))
 --
 -- >>> isErrorResult (parse (betweenSepbyComma '[' ']' lower) "a]")
 -- True
-betweenSepbyComma ::
-  Char
-  -> Char
-  -> Parser a
-  -> Parser (List a)
-betweenSepbyComma =
-  error "todo: Course.MoreParser#betweenSepbyComma"
+betweenSepbyComma :: Char -> Char -> Parser a -> Parser (List a)
+betweenSepbyComma l r p =
+  betweenCharTok l r (sepby p (is ','))
