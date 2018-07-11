@@ -109,7 +109,9 @@ toSpecialCharacter c =
 -- True
 jsonString :: Parser Chars
 jsonString =
-  between (is '"') (charTok '"') (list (character))
+  between (is '"') (charTok '"') (list (noneof "\""))
+  >>= (\x ->
+         valueParser x)
 
 -- | Parse a JSON rational.
 --
