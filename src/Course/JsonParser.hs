@@ -79,7 +79,25 @@ toSpecialCharacter c =
               ('\\', Backslash) :.
               Nil
   in snd <$> find ((==) c . fst) table
-  
+
+-- >>> parse specialCharacter "\\b"
+-- Result >b< "\\"
+-- >>> parse specialCharacter "b"
+-- Result >< "b"
+-- >>> parse specialCharacter "r"
+-- Result >\r< ""
+specialCharacter :: Parser Char
+specialCharacter = character >>= (\x -> case toSpecialCharacter x of
+                                        Full sp -> valueParser (fromSpecialCharacter sp)
+                                        Empty -> unexpectedStringParser "")
+
+-- >>> parse doubleSlash "\\b"
+-- Result >b< "\\"
+-- >>> parse specialCharacter "\b"
+-- Result >\b< ""
+doubleSlash :: Parser Char
+doubleSlash = is '\\'
+
 -- | Parse a JSON string. Handle double-quotes, special characters, hexadecimal characters. See http://json.org for the full list of control characters in JSON.
 --
 -- /Tip:/ Use `hex`, `fromSpecialCharacter`, `between`, `is`, `charTok`, `toSpecialCharacter`.
@@ -107,11 +125,14 @@ toSpecialCharacter c =
 --
 -- >>> isErrorResult (parse jsonString "\"\\abc\"def")
 -- True
+
+validStringContents :: Parser Char
+validStringContents = (doubleSlash *> hexu)
+                      ||| (doubleSlash *> specialCharacter)
+                      ||| (noneof "\"\\")
 jsonString :: Parser Chars
 jsonString =
-  between (is '"') (charTok '"') (list (noneof "\""))
-  >>= (\x ->
-         valueParser x)
+  between (is '"') (charTok '"') (list validStringContents)
 
 -- | Parse a JSON rational.
 --
