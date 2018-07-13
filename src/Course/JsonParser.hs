@@ -158,10 +158,11 @@ jsonString =
 --
 -- >>> isErrorResult (parse jsonNumber "abc")
 -- True
-jsonNumber ::
-  Parser Rational
+jsonNumber :: Parser Rational
 jsonNumber =
-  error "todo: Course.JsonParser#jsonNumber"
+  list character >>= (\chars -> case readFloats chars of
+                                Full x -> valueParser (fst x)
+                                _ -> unexpectedStringParser chars)
 
 -- | Parse a JSON true literal.
 --
