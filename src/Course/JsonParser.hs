@@ -173,10 +173,8 @@ jsonNumber =
 --
 -- >>> isErrorResult (parse jsonTrue "TRUE")
 -- True
-jsonTrue ::
-  Parser Chars
-jsonTrue =
-  error "todo: Course.JsonParser#jsonTrue"
+jsonTrue :: Parser Chars
+jsonTrue = stringTok "true"
 
 -- | Parse a JSON false literal.
 --
@@ -187,10 +185,8 @@ jsonTrue =
 --
 -- >>> isErrorResult (parse jsonFalse "FALSE")
 -- True
-jsonFalse ::
-  Parser Chars
-jsonFalse =
-  error "todo: Course.JsonParser#jsonFalse"
+jsonFalse :: Parser Chars
+jsonFalse = stringTok "false"
 
 -- | Parse a JSON null literal.
 --
