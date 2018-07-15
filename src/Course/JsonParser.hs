@@ -197,10 +197,8 @@ jsonFalse = stringTok "false"
 --
 -- >>> isErrorResult (parse jsonNull "NULL")
 -- True
-jsonNull ::
-  Parser Chars
-jsonNull =
-  error "todo: Course.JsonParser#jsonNull"
+jsonNull :: Parser Chars
+jsonNull = stringTok "null"
 
 -- | Parse a JSON array.
 --
@@ -220,10 +218,8 @@ jsonNull =
 --
 -- >>> parse jsonArray "[true, \"abc\", [false]]"
 -- Result >< [JsonTrue,JsonString "abc",JsonArray [JsonFalse]]
-jsonArray ::
-  Parser (List JsonValue)
-jsonArray =
-  error "todo: Course.JsonParser#jsonArray"
+jsonArray :: Parser (List JsonValue)
+jsonArray = betweenSepbyComma '[' ']' jsonValue
 
 -- | Parse a JSON object.
 --
@@ -240,8 +236,7 @@ jsonArray =
 --
 -- >>> parse jsonObject "{ \"key1\" : true , \"key2\" : false } xyz"
 -- Result >xyz< [("key1",JsonTrue),("key2",JsonFalse)]
-jsonObject ::
-  Parser Assoc
+jsonObject :: Parser Assoc
 jsonObject =
   error "todo: Course.JsonParser#jsonObject"
 
