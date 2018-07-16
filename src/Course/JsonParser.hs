@@ -238,7 +238,10 @@ jsonArray = betweenSepbyComma '[' ']' jsonValue
 -- Result >xyz< [("key1",JsonTrue),("key2",JsonFalse)]
 jsonObject :: Parser Assoc
 jsonObject =
-  error "todo: Course.JsonParser#jsonObject"
+  betweenSepbyComma '{' '}'
+  ((spaces *> jsonString) >>=~
+    (\key -> charTok ':' *> jsonValue >>=~
+     (\value -> valueParser (key,value))))
 
 -- | Parse a JSON value.
 --
