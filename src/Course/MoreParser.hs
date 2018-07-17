@@ -356,4 +356,4 @@ satisfyAny preds = satisfy (\x -> or (map (\p -> p x) preds))
 -- True
 betweenSepbyComma :: Char -> Char -> Parser a -> Parser (List a)
 betweenSepbyComma l r p =
-  betweenCharTok l r (sepby p (is ','))
+  betweenCharTok l r (sepby p (charTok ','))

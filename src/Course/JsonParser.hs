@@ -239,9 +239,12 @@ jsonArray = betweenSepbyComma '[' ']' jsonValue
 jsonObject :: Parser Assoc
 jsonObject =
   betweenSepbyComma '{' '}'
-  ((spaces *> jsonString) >>=~
-    (\key -> charTok ':' *> jsonValue >>=~
+  (jsonString >>=
+    (\key -> charTok ':' *> jsonValue <* spaces >>=
      (\value -> valueParser (key,value))))
+--jsonObject =
+--  let f = (,) <$> (jsonString <* charTok ':') <*> jsonValue
+--  in betweenSepbyComma '{' '}' f
 
 -- | Parse a JSON value.
 --
