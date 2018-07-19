@@ -36,3 +36,4 @@ TAGS
 # Vagrant
 .vagrant
 ops/*.retry
+/output

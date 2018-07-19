@@ -80,10 +80,10 @@ data Op =
 -- /Tip:/ @putStr :: String -> IO ()@ -- Prints a string to standard output.
 --
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
-convertInteractive ::
-  IO ()
+convertInteractive :: IO ()
 convertInteractive =
-  error "todo: Course.Interactive#convertInteractive"
+  (putStrLn "Enter a string to convert: ") >-
+     getLine >>= (\input -> putStrLn (toUpper <$> input))
 
 -- |
 --
@@ -108,10 +108,16 @@ convertInteractive =
 -- /Tip:/ @putStr :: String -> IO ()@ -- Prints a string to standard output.
 --
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
-reverseInteractive ::
-  IO ()
+reverseInteractive :: IO ()
 reverseInteractive =
-  error "todo: Course.Interactive#reverseInteractive"
+  (putStrLn "Enter the file to reverse:") >-
+  getLine >>=
+  (\input ->
+      (putStrLn "Enter file to write to: ") >-
+      getLine >>=
+      (\output ->
+         readFile input >>=
+          (\contents -> writeFile output (reverse contents))))
 
 -- |
 --
