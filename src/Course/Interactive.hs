@@ -119,6 +119,13 @@ reverseInteractive =
          readFile input >>=
           (\contents -> writeFile output (reverse contents))))
 
+
+encodeUrl :: Char -> Chars
+encodeUrl ' '  = "%20"
+encodeUrl '\t' = "%09"
+encodeUrl '\"' = "%22"
+encodeUrl x = x :. Nil
+
 -- |
 --
 -- * Ask the user to enter a string to url-encode.
@@ -140,10 +147,14 @@ reverseInteractive =
 -- /Tip:/ @putStr :: String -> IO ()@ -- Prints a string to standard output.
 --
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
-encodeInteractive ::
-  IO ()
+
+-- > test.com?steve is "great"
+-- > test.com?steve%20is%20%22great%22
+encodeInteractive :: IO ()
 encodeInteractive =
-  error "todo: Course.Interactive#encodeInteractive"
+  putStrLn "Enter string to URL encode: " >-
+  getLine >>=
+  (\str -> putStrLn (flatMap encodeUrl str))
 
 interactive ::
   IO ()
