@@ -37,181 +37,33 @@ illion =
         List (Chars -> Chars)
       preillion =
         listh [
-          const ""
-        , const "un"
-        , const "do"
-        , const "tre"
-        , const "quattuor"
-        , const "quin"
-        , const "sex"
-        , const "septen"
-        , const "octo"
+          const "" , const "un" , const "do" , const "tre" , const "quattuor" , const "quin" , const "sex" , const "septen" , const "octo"
         , \q -> if "n" `isPrefixOf` q then "novem" else "noven"
         ]
       postillion ::
         List Chars
       postillion =
         listh [
-          "vigintillion"
-        , "trigintillion"
-        , "quadragintillion"
-        , "quinquagintillion"
-        , "sexagintillion"
-        , "septuagintillion"
-        , "octogintillion"
-        , "nonagintillion"
-        , "centillion"
-        , "decicentillion"
-        , "viginticentillion"
-        , "trigintacentillion"
-        , "quadragintacentillion"
-        , "quinquagintacentillion"
-        , "sexagintacentillion"
-        , "septuagintacentillion"
-        , "octogintacentillion"
-        , "nonagintacentillion"
-        , "ducentillion"
-        , "deciducentillion"
-        , "vigintiducentillion"
-        , "trigintaducentillion"
-        , "quadragintaducentillion"
-        , "quinquagintaducentillion"
-        , "sexagintaducentillion"
-        , "septuagintaducentillion"
-        , "octogintaducentillion"
-        , "nonagintaducentillion"
-        , "trecentillion"
-        , "decitrecentillion"
-        , "vigintitrecentillion"
-        , "trigintatrecentillion"
-        , "quadragintatrecentillion"
-        , "quinquagintatrecentillion"
-        , "sexagintatrecentillion"
-        , "septuagintatrecentillion"
-        , "octogintatrecentillion"
-        , "nonagintatrecentillion"
-        , "quadringentillion"
-        , "deciquadringentillion"
-        , "vigintiquadringentillion"
-        , "trigintaquadringentillion"
-        , "quadragintaquadringentillion"
-        , "quinquagintaquadringentillion"
-        , "sexagintaquadringentillion"
-        , "septuagintaquadringentillion"
-        , "octogintaquadringentillion"
-        , "nonagintaquadringentillion"
-        , "quingentillion"
-        , "deciquingentillion"
-        , "vigintiquingentillion"
-        , "trigintaquingentillion"
-        , "quadragintaquingentillion"
-        , "quinquagintaquingentillion"
-        , "sexagintaquingentillion"
-        , "septuagintaquingentillion"
-        , "octogintaquingentillion"
-        , "nonagintaquingentillion"
-        , "sescentillion"
-        , "decisescentillion"
-        , "vigintisescentillion"
-        , "trigintasescentillion"
-        , "quadragintasescentillion"
-        , "quinquagintasescentillion"
-        , "sexagintasescentillion"
-        , "septuagintasescentillion"
-        , "octogintasescentillion"
-        , "nonagintasescentillion"
-        , "septingentillion"
-        , "deciseptingentillion"
-        , "vigintiseptingentillion"
-        , "trigintaseptingentillion"
-        , "quadragintaseptingentillion"
-        , "quinquagintaseptingentillion"
-        , "sexagintaseptingentillion"
-        , "septuagintaseptingentillion"
-        , "octogintaseptingentillion"
-        , "nonagintaseptingentillion"
-        , "octingentillion"
-        , "decioctingentillion"
-        , "vigintioctingentillion"
-        , "trigintaoctingentillion"
-        , "quadragintaoctingentillion"
-        , "quinquagintaoctingentillion"
-        , "sexagintaoctingentillion"
-        , "septuagintaoctingentillion"
-        , "octogintaoctingentillion"
-        , "nonagintaoctingentillion"
-        , "nongentillion"
-        , "decinongentillion"
-        , "vigintinongentillion"
-        , "trigintanongentillion"
-        , "quadragintanongentillion"
-        , "quinquagintanongentillion"
-        , "sexagintanongentillion"
-        , "septuagintanongentillion"
-        , "octogintanongentillion"
-        , "nonagintanongentillion"
+          "vigintillion" , "trigintillion" , "quadragintillion" , "quinquagintillion" , "sexagintillion" , "septuagintillion" , "octogintillion" , "nonagintillion" , "centillion" , "decicentillion" , "viginticentillion" , "trigintacentillion" , "quadragintacentillion" , "quinquagintacentillion" , "sexagintacentillion" , "septuagintacentillion" , "octogintacentillion" , "nonagintacentillion" , "ducentillion" , "deciducentillion" , "vigintiducentillion" , "trigintaducentillion" , "quadragintaducentillion" , "quinquagintaducentillion" , "sexagintaducentillion" , "septuagintaducentillion" , "octogintaducentillion" , "nonagintaducentillion" , "trecentillion" , "decitrecentillion" , "vigintitrecentillion" , "trigintatrecentillion" , "quadragintatrecentillion" , "quinquagintatrecentillion" , "sexagintatrecentillion" , "septuagintatrecentillion" , "octogintatrecentillion" , "nonagintatrecentillion" , "quadringentillion" , "deciquadringentillion" , "vigintiquadringentillion" , "trigintaquadringentillion" , "quadragintaquadringentillion" , "quinquagintaquadringentillion" , "sexagintaquadringentillion" , "septuagintaquadringentillion" , "octogintaquadringentillion" , "nonagintaquadringentillion" , "quingentillion" , "deciquingentillion" , "vigintiquingentillion" , "trigintaquingentillion" , "quadragintaquingentillion" , "quinquagintaquingentillion" , "sexagintaquingentillion" , "septuagintaquingentillion" , "octogintaquingentillion" , "nonagintaquingentillion" , "sescentillion" , "decisescentillion" , "vigintisescentillion" , "trigintasescentillion" , "quadragintasescentillion" , "quinquagintasescentillion" , "sexagintasescentillion" , "septuagintasescentillion" , "octogintasescentillion" , "nonagintasescentillion" , "septingentillion" , "deciseptingentillion" , "vigintiseptingentillion" , "trigintaseptingentillion" , "quadragintaseptingentillion" , "quinquagintaseptingentillion" , "sexagintaseptingentillion" , "septuagintaseptingentillion" , "octogintaseptingentillion" , "nonagintaseptingentillion" , "octingentillion" , "decioctingentillion" , "vigintioctingentillion" , "trigintaoctingentillion" , "quadragintaoctingentillion" , "quinquagintaoctingentillion" , "sexagintaoctingentillion" , "septuagintaoctingentillion" , "octogintaoctingentillion" , "nonagintaoctingentillion" , "nongentillion" , "decinongentillion" , "vigintinongentillion" , "trigintanongentillion" , "quadragintanongentillion" , "quinquagintanongentillion" , "sexagintanongentillion" , "septuagintanongentillion" , "octogintanongentillion" , "nonagintanongentillion"
         ]
   in listh [
-       ""
-     , "thousand"
-     , "million"
-     , "billion"
-     , "trillion"
-     , "quadrillion"
-     , "quintillion"
-     , "sextillion"
-     , "septillion"
-     , "octillion"
-     , "nonillion"
-     , "decillion"
-     , "undecillion"
-     , "duodecillion"
-     , "tredecillion"
-     , "quattuordecillion"
-     , "quindecillion"
-     , "sexdecillion"
-     , "septendecillion"
-     , "octodecillion"
-     , "novemdecillion"
+       "" , "thousand" , "million" , "billion" , "trillion" , "quadrillion" , "quintillion" , "sextillion" , "septillion" , "octillion" , "nonillion" , "decillion" , "undecillion" , "duodecillion" , "tredecillion" , "quattuordecillion" , "quindecillion" , "sexdecillion" , "septendecillion" , "octodecillion" , "novemdecillion"
      ] ++ lift2 ((++) =<<) preillion postillion
 
 -- A data type representing the digits zero to nine.
-data Digit =
-  Zero
-  | One
-  | Two
-  | Three
-  | Four
-  | Five
-  | Six
-  | Seven
-  | Eight
-  | Nine
-  deriving (Eq, Ord)
+data Digit = Zero | One | Two | Three | Four | Five | Six | Seven | Eight | Nine deriving (Eq, Ord)
 
-showDigit ::
-  Digit
-  -> Chars
-showDigit Zero =
-  "zero"
-showDigit One =
-  "one"
-showDigit Two =
-  "two"
-showDigit Three =
-  "three"
-showDigit Four =
-  "four"
-showDigit Five =
-  "five"
-showDigit Six =
-  "six"
-showDigit Seven =
-  "seven"
-showDigit Eight =
-  "eight"
-showDigit Nine =
-  "nine"
+showDigit :: Digit -> Chars
+showDigit Zero = "zero"
+showDigit One = "one"
+showDigit Two = "two"
+showDigit Three = "three"
+showDigit Four = "four"
+showDigit Five = "five"
+showDigit Six = "six"
+showDigit Seven = "seven"
+showDigit Eight = "eight"
+showDigit Nine = "nine"
 
 -- A data type representing one, two or three digits, which may be useful for grouping.
 data Digit3 =
@@ -221,31 +73,85 @@ data Digit3 =
   deriving Eq
 
 -- Possibly convert a character to a digit.
-fromChar ::
-  Char
-  -> Optional Digit
-fromChar '0' =
-  Full Zero
-fromChar '1' =
-  Full One
-fromChar '2' =
-  Full Two
-fromChar '3' =
-  Full Three
-fromChar '4' =
-  Full Four
-fromChar '5' =
-  Full Five
-fromChar '6' =
-  Full Six
-fromChar '7' =
-  Full Seven
-fromChar '8' =
-  Full Eight
-fromChar '9' =
-  Full Nine
-fromChar _ =
-  Empty
+fromChar :: Char -> Optional Digit
+fromChar '0' = Full Zero
+fromChar '1' = Full One
+fromChar '2' = Full Two
+fromChar '3' = Full Three
+fromChar '4' = Full Four
+fromChar '5' = Full Five
+fromChar '6' = Full Six
+fromChar '7' = Full Seven
+fromChar '8' = Full Eight
+fromChar '9' = Full Nine
+fromChar _ = Empty
+
+toInt :: Digit -> Int
+toInt Zero = 0
+toInt One = 1
+toInt Two = 2
+toInt Three = 3
+toInt Four = 4
+toInt Five = 5
+toInt Six = 6
+toInt Seven = 7
+toInt Eight = 8
+toInt Nine = 9
+
+teens :: Chars -> Chars
+teens "10" = "ten"
+teens "11" = "eleven"
+teens "12" = "twelve"
+teens "13" = "thirteen"
+teens "14" = "fourteen"
+teens "15" = "fifteen"
+teens "16" = "sixteen"
+teens "17" = "seventeen"
+teens "18" = "eighteen"
+teens "19" = "nineteen"
+teens _  = ""
+
+showTens :: Digit -> Chars
+showTens Zero   = ""
+showTens One    = "ten"
+showTens Two    = "twenty"
+showTens Three  = "thirty"
+showTens Four   = "forty"
+showTens Five   = "fifty"
+showTens Six    = "sixty"
+showTens Seven  = "seventy"
+showTens Eight  = "eighty"
+showTens Nine   = "ninety"
+
+stripZero :: Chars -> Chars
+stripZero "zero" = ""
+stripZero h = h
+
+
+-- >>> dollars ".02"
+doCents :: Chars -> Optional (Chars, Bool)
+doCents ('.' :. ths :. hths :. _) = do
+  tenths <- fromChar ths
+  hundredths <- fromChar hths
+  case tenths of
+    Zero -> Full $ (showDigit hundredths, (hundredths /= One))
+    One -> Full $ (teens (ths:.hths:.Nil), True)
+    _ -> Full $ (((showTens tenths) ++ "-" ++ (showDigit hundredths)), True)
+doCents ('.' :. tenths :. Nil) = (\x -> (showTens x, True)) <$> (fromChar tenths)
+doCents "." = Empty
+doCents _ = Empty
+
+doDollars :: (Eq a, IsString a) => a -> Optional a1
+doDollars _ = Empty
+
+dollars :: Chars -> Chars
+dollars input =
+  let (whole, frac) = break (== '.') input
+      x = map fromChar whole
+      (cents, plural) = doCents frac ?? ("zero", True)
+      centName = if plural then " cents" else " cent"
+      dollars = doDollars whole ?? "zero"
+  in dollars ++ " dollars and " ++ cents ++ centName
 
 -- | Take a numeric value and produce its English output.
 --
@@ -320,8 +226,3 @@ fromChar _ =
 --
 -- >>> dollars "456789123456789012345678901234567890123456789012345678901234567890.12"
 -- "four hundred and fifty-six vigintillion seven hundred and eighty-nine novemdecillion one hundred and twenty-three octodecillion four hundred and fifty-six septendecillion seven hundred and eighty-nine sexdecillion twelve quindecillion three hundred and forty-five quattuordecillion six hundred and seventy-eight tredecillion nine hundred and one duodecillion two hundred and thirty-four undecillion five hundred and sixty-seven decillion eight hundred and ninety nonillion one hundred and twenty-three octillion four hundred and fifty-six septillion seven hundred and eighty-nine sextillion twelve quintillion three hundred and forty-five quadrillion six hundred and seventy-eight trillion nine hundred and one billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety dollars and twelve cents"
-dollars ::
-  Chars
-  -> Chars
-dollars =
-  error "todo: Course.Cheque#dollars"
