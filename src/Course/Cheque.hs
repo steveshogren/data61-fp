@@ -127,31 +127,43 @@ stripZero :: Chars -> Chars
 stripZero "zero" = ""
 stripZero h = h
 
+doHundreds :: List Char -> Optional (Chars, Bool)
+doHundreds (ths :. ones :. _) = do
+  pTens <- fromChar ths
+  pOnes <- fromChar ones
+  case pTens of
+    Zero -> Full $ (showDigit pOnes, (pOnes /= One))
+    One -> Full $ (teens (ths:.ones:.Nil), True)
+    _ -> Full $ (((showTens pTens ) ++ "-" ++ (showDigit pOnes)), True)
+doHundreds (pTens :. Nil) = (\x -> (showTens x, True)) <$> (fromChar pTens)
+doHundreds _ = Empty
 
--- >>> dollars ".02"
 doCents :: Chars -> Optional (Chars, Bool)
-doCents ('.' :. ths :. hths :. _) = do
-  tenths <- fromChar ths
-  hundredths <- fromChar hths
-  case tenths of
-    Zero -> Full $ (showDigit hundredths, (hundredths /= One))
-    One -> Full $ (teens (ths:.hths:.Nil), True)
-    _ -> Full $ (((showTens tenths) ++ "-" ++ (showDigit hundredths)), True)
-doCents ('.' :. tenths :. Nil) = (\x -> (showTens x, True)) <$> (fromChar tenths)
-doCents "." = Empty
+doCents ('.' :. h :. t :. Nil) = doHundreds (h :. t :. Nil)
+doCents ('.' :. tenths :. Nil) = doHundreds (tenths :. Nil)
 doCents _ = Empty
 
-doDollars :: (Eq a, IsString a) => a -> Optional a1
-doDollars _ = Empty
 
+
+-- >>> dollars "13.02"
+doDollars :: Chars -> Optional (Chars, Bool)
+-- doDollars (tt :. h :. t :. o :. rest) = (\x -> (showTens x, True)) <$> (fromChar pTens)
+doDollars hs@(_ :. _ :. _ :. _) = doHundreds hs
+doDollars ts@(_ :. _ :. _) = doHundreds ts
+doDollars (o :. _) = (\ones -> (showDigit ones, (ones /= One))) <$> fromChar o
+doDollars _ = Empty
+-- doDollars (Nil) = (\x -> (showTens x, True)) <$> (fromChar pTens)
+
+-- >>> dollars "1.02"
 dollars :: Chars -> Chars
 dollars input =
   let (whole, frac) = break (== '.') input
       x = map fromChar whole
-      (cents, plural) = doCents frac ?? ("zero", True)
-      centName = if plural then " cents" else " cent"
-      dollars = doDollars whole ?? "zero"
-  in dollars ++ " dollars and " ++ cents ++ centName
+      (cents, pluralc) = doCents frac ?? ("zero", True)
+      centName = if pluralc then " cents" else " cent"
+      (dolls, plurald) = doDollars whole ?? ("zero", True)
+      dollarsName = if plurald then " dollars" else " dollar"
+  in dolls ++  dollarsName ++ " and " ++ cents ++ centName
 
 -- | Take a numeric value and produce its English output.
 --
