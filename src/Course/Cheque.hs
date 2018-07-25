@@ -123,9 +123,9 @@ showTens Seven  = "seventy"
 showTens Eight  = "eighty"
 showTens Nine   = "ninety"
 
-stripZero :: Chars -> Chars
-stripZero "zero" = ""
-stripZero h = h
+stripZero :: Digit -> Optional Digit
+stripZero Zero = Empty
+stripZero x = Full x
 
 nums :: List Chars
 nums = ("" :. "hundred" :. "thousand" :. "million" :. Nil)
@@ -134,27 +134,30 @@ chooseWord :: (Num n, Ord n) => n -> Chars
 chooseWord n = (" " ++ (headOr "" (drop n nums)) ++ " ")
 
 --  "543,21"
--- >>> dollars "1455567.67"
+-- >>> dollars "8124345.67"
+-- >>> dollars "124345.67"
+-- >>> dollars "100.67"
 -- "twelve thousand three hundred and forty-five dollars and sixty-seven cents"
-doThousands :: List Char -> Int -> Optional (Chars, Bool)
-doThousands (ones :. tens :. hundreds :. rest) d = do
-  (pHundreds) <- (\h -> showDigit h ++ (chooseWord (d+1))) <$> fromChar hundreds
-  (pTensOnes, _) <- doThousands (tens :. ones :. Nil) d
-  (pRest, _) <- doThousands rest (d+2)
+wordify :: List Char -> Int -> Optional (Chars, Bool)
+wordify (ones :. tens :. hundreds :. rest) d = do
+  (pHundreds) <- (\h -> showDigit h ++ " hundred ") <$> (fromChar hundreds >>= stripZero)
+  (pTensOnes, _) <- wordify (ones :. tens :. Nil) d
+  (pRest, _) <- wordify rest (d+2)
   Full ((pRest ++ pHundreds ++ pTensOnes), True)
-doThousands (ones :. tens :.  _) d = do
+-- "eighty-one" or "seventeen"
+wordify (ones :. tens :.  _) d = do
   pTens <- fromChar tens
   pOnes <- fromChar ones
   case pTens of
-    Zero -> Full $ (showDigit pOnes, (pOnes /= One))
+    Zero -> wordify (ones :. Nil) d
     One -> Full $ (teens (tens:.ones:.Nil) ++ (chooseWord (d)), True)
     _ -> Full $ (((showTens pTens ) ++ "-" ++ (showDigit pOnes) ++ (chooseWord (d))), True)
-doThousands (pTens :. Nil) d = (\x -> (showDigit x ++ (chooseWord d), True)) <$> (fromChar pTens)
-doThousands _ _ = Full ("", True)
+wordify (ones :. Nil) d = (\x -> (showDigit x ++ (chooseWord d), True)) <$> (fromChar ones >>= stripZero)
+wordify _ _ = Full ("", True)
 
 doCents :: Chars -> Optional (Chars, Bool)
-doCents ('.' :. h :. t :. Nil) = doThousands (h :. t :. Nil) 0
-doCents ('.' :. tenths :. Nil) = doThousands (tenths :. Nil) 0
+doCents ('.' :. h :. t :. Nil) = wordify (h :. t :. Nil) 0
+doCents ('.' :. tenths :. Nil) = wordify (tenths :. Nil) 0
 doCents _ = Empty
 
 
@@ -168,8 +171,8 @@ doCents _ = Empty
 -- >>> dollars "134.02"
 doDollars :: Chars -> Optional (Chars, Bool)
 -- doDollars (tt :. h :. t :. o :. rest) = (\x -> (showTens x, True)) <$> (fromChar pTens)
-doDollars hs = doThousands (reverse hs) 0
---doDollars ts@(_ :. _ :. _) = doThousands ts
+doDollars hs = wordify (reverse hs) 0
+--doDollars ts@(_ :. _ :. _) = wordify ts
 --doDollars (o :. Nil) = (\ones -> (showDigit ones, (ones /= One))) <$> fromChar o
 --doDollars _ = Empty
 -- doDollars (Nil) = (\x -> (showTens x, True)) <$> (fromChar pTens)
@@ -180,7 +183,7 @@ dollars input =
   let (whole, frac) = break (== '.') input
       x = map fromChar whole
       (cents, pluralc) = doCents frac ?? ("zero", True)
-      centName = if pluralc then " cents" else " cent"
+      centName = if pluralc then "cents" else "cent"
       (dolls, plurald) = doDollars whole ?? ("zero", True)
       dollarsName = if plurald then "dollars" else "dollar"
   in dolls ++  dollarsName ++ " and " ++ cents ++ centName
