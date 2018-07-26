@@ -128,21 +128,26 @@ stripZero Zero = Empty
 stripZero x = Full x
 
 nums :: List Chars
-nums = ("" :. "hundred" :. "thousand" :. "million" :. Nil)
+nums = ("" :. " thousand " :. " million " :. " trillion " :. Nil)
 
 chooseWord :: (Num n, Ord n) => n -> Chars
-chooseWord n = (" " ++ (headOr "" (drop n nums)) ++ " ")
+chooseWord n = (headOr "" (drop n nums))
 
---  "543,21"
--- >>> dollars "8124345.67"
+displaySingleDigit :: List Char -> Digit -> (List Char, Bool)
+displaySingleDigit _ Zero = ("", True)
+displaySingleDigit word One = (showDigit One ++ word, False)
+displaySingleDigit word ch = (showDigit ch ++ word, True)
+
+-- >>> dollars "543813324345.67"
 -- >>> dollars "124345.67"
--- >>> dollars "100.67"
+-- >>> dollars "1000.67"
+-- >>> dollars "1.67"
 -- "twelve thousand three hundred and forty-five dollars and sixty-seven cents"
 wordify :: List Char -> Int -> Optional (Chars, Bool)
 wordify (ones :. tens :. hundreds :. rest) d = do
-  (pHundreds) <- (\h -> showDigit h ++ " hundred ") <$> (fromChar hundreds >>= stripZero)
+  (pHundreds, _) <- (displaySingleDigit " hundred ") <$> (fromChar hundreds)
   (pTensOnes, _) <- wordify (ones :. tens :. Nil) d
-  (pRest, _) <- wordify rest (d+2)
+  (pRest, _) <- wordify rest (d+1)
   Full ((pRest ++ pHundreds ++ pTensOnes), True)
 -- "eighty-one" or "seventeen"
 wordify (ones :. tens :.  _) d = do
@@ -152,7 +157,7 @@ wordify (ones :. tens :.  _) d = do
     Zero -> wordify (ones :. Nil) d
     One -> Full $ (teens (tens:.ones:.Nil) ++ (chooseWord (d)), True)
     _ -> Full $ (((showTens pTens ) ++ "-" ++ (showDigit pOnes) ++ (chooseWord (d))), True)
-wordify (ones :. Nil) d = (\x -> (showDigit x ++ (chooseWord d), True)) <$> (fromChar ones >>= stripZero)
+wordify (ones :. Nil) d = displaySingleDigit (chooseWord d) <$> fromChar ones
 wordify _ _ = Full ("", True)
 
 doCents :: Chars -> Optional (Chars, Bool)
@@ -160,22 +165,9 @@ doCents ('.' :. h :. t :. Nil) = wordify (h :. t :. Nil) 0
 doCents ('.' :. tenths :. Nil) = wordify (tenths :. Nil) 0
 doCents _ = Empty
 
-
--- data Digit3 =
---   D1 Digit
---   | D2 Digit Digit
---   | D3 Digit Digit Digit
---   deriving Eq
-
-
 -- >>> dollars "134.02"
 doDollars :: Chars -> Optional (Chars, Bool)
--- doDollars (tt :. h :. t :. o :. rest) = (\x -> (showTens x, True)) <$> (fromChar pTens)
 doDollars hs = wordify (reverse hs) 0
---doDollars ts@(_ :. _ :. _) = wordify ts
---doDollars (o :. Nil) = (\ones -> (showDigit ones, (ones /= One))) <$> fromChar o
---doDollars _ = Empty
--- doDollars (Nil) = (\x -> (showTens x, True)) <$> (fromChar pTens)
 
 -- >>> dollars "1.02"
 dollars :: Chars -> Chars
@@ -183,9 +175,9 @@ dollars input =
   let (whole, frac) = break (== '.') input
       x = map fromChar whole
       (cents, pluralc) = doCents frac ?? ("zero", True)
-      centName = if pluralc then "cents" else "cent"
+      centName = if pluralc then " cents" else " cent"
       (dolls, plurald) = doDollars whole ?? ("zero", True)
-      dollarsName = if plurald then "dollars" else "dollar"
+      dollarsName = if plurald then " dollars" else " dollar"
   in dolls ++  dollarsName ++ " and " ++ cents ++ centName
 
 -- | Take a numeric value and produce its English output.
