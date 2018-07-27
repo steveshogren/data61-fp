@@ -25,6 +25,12 @@ import Course.List
 import Course.Functor
 import Course.Applicative
 import Course.Monad
+import Data.Char (isSpace)
+
+trim :: Chars -> Chars
+trim = f . f
+   where f = reverse . dropWhile isSpace
+
 
 -- $setup
 -- >>> :set -XOverloadedStrings
@@ -133,6 +139,8 @@ nums = ("" :. " thousand " :. " million " :. " trillion " :. Nil)
 chooseWord :: (Num n, Ord n) => n -> Chars
 chooseWord n = (headOr "" (drop n nums))
 
+
+
 displaySingleDigit :: List Char -> Digit -> (List Char, Bool)
 displaySingleDigit _ Zero = ("", True)
 displaySingleDigit word One = (showDigit One ++ word, False)
@@ -140,8 +148,9 @@ displaySingleDigit word ch = (showDigit ch ++ word, True)
 
 -- >>> dollars "543813324345.67"
 -- >>> dollars "124345.67"
--- >>> dollars "1000.67"
+-- >>> dollars "100.67"
 -- >>> dollars "1.67"
+-- >>> dollars "0.67"
 -- "twelve thousand three hundred and forty-five dollars and sixty-seven cents"
 wordify :: List Char -> Int -> Optional (Chars, Bool)
 wordify (ones :. tens :. hundreds :. rest) d = do
@@ -161,12 +170,14 @@ wordify (ones :. Nil) d = displaySingleDigit (chooseWord d) <$> fromChar ones
 wordify _ _ = Full ("", True)
 
 doCents :: Chars -> Optional (Chars, Bool)
-doCents ('.' :. h :. t :. Nil) = wordify (h :. t :. Nil) 0
-doCents ('.' :. tenths :. Nil) = wordify (tenths :. Nil) 0
+doCents ('.' :. t :. h :. Nil) = wordify (h :. t :. Nil) 0
+doCents ('.' :. t :. Nil) = wordify ('0' :. t :. Nil) 0
+doCents ('.' :. Nil) = Full ("zero", True)
 doCents _ = Empty
 
 -- >>> dollars "134.02"
 doDollars :: Chars -> Optional (Chars, Bool)
+doDollars "0" = Full ("zero", True)
 doDollars hs = wordify (reverse hs) 0
 
 -- >>> dollars "1.02"
@@ -178,7 +189,7 @@ dollars input =
       centName = if pluralc then " cents" else " cent"
       (dolls, plurald) = doDollars whole ?? ("zero", True)
       dollarsName = if plurald then " dollars" else " dollar"
-  in dolls ++  dollarsName ++ " and " ++ cents ++ centName
+  in (trim dolls) ++  dollarsName ++ " and " ++ (trim cents) ++ centName
 
 -- | Take a numeric value and produce its English output.
 --
