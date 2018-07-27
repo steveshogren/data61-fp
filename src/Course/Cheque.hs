@@ -25,7 +25,7 @@ import Course.List
 import Course.Functor
 import Course.Applicative
 import Course.Monad
-import Data.Char (isSpace)
+import Data.Char (isSpace, isDigit)
 
 trim :: Chars -> Chars
 trim = f . f
@@ -170,26 +170,35 @@ wordify (ones :. Nil) d = displaySingleDigit (chooseWord d) <$> fromChar ones
 wordify _ _ = Full ("", True)
 
 doCents :: Chars -> Optional (Chars, Bool)
-doCents ('.' :. t :. h :. Nil) = wordify (h :. t :. Nil) 0
-doCents ('.' :. t :. Nil) = wordify ('0' :. t :. Nil) 0
-doCents ('.' :. Nil) = Full ("zero", True)
-doCents _ = Empty
+doCents (t :. h :. _) = wordify (h :. t :. Nil) 0
+doCents (t :. Nil) = wordify ('0' :. t :. Nil) 0
+doCents (Nil) = Full ("zero", True)
 
 -- >>> dollars "134.02"
 doDollars :: Chars -> Optional (Chars, Bool)
 doDollars "0" = Full ("zero", True)
 doDollars hs = wordify (reverse hs) 0
 
+removeNonDigit :: List Char -> List Char
+removeNonDigit = filter (\x -> isDigit x || (x=='.'))
+
+removeExtraDots :: List Char -> List Char
+removeExtraDots = filter isDigit
+
+-- >>> dollars "9abc9def9ghi.jkl9mno"
 -- >>> dollars "1.02"
 dollars :: Chars -> Chars
-dollars input =
-  let (whole, frac) = break (== '.') input
+dollars i =
+  let input = removeNonDigit i
+      (whole, frac) = break (== '.') input
       x = map fromChar whole
-      (cents, pluralc) = doCents frac ?? ("zero", True)
+      (cents, pluralc) = doCents (removeExtraDots frac) ?? ("zero", True)
+      realCents = if cents == "" then "zero" else cents
       centName = if pluralc then " cents" else " cent"
       (dolls, plurald) = doDollars whole ?? ("zero", True)
+      realDollars = if dolls == "" then "zero" else dolls
       dollarsName = if plurald then " dollars" else " dollar"
-  in (trim dolls) ++  dollarsName ++ " and " ++ (trim cents) ++ centName
+  in (trim realDollars) ++  dollarsName ++ " and " ++ (trim realCents) ++ centName
 
 -- | Take a numeric value and produce its English output.
 --
