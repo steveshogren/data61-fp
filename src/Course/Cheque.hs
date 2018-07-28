@@ -129,17 +129,17 @@ showTens Seven  = "seventy"
 showTens Eight  = "eighty"
 showTens Nine   = "ninety"
 
-stripZero :: Digit -> Optional Digit
-stripZero Zero = Empty
-stripZero x = Full x
+stripZero :: Chars -> Chars
+stripZero "zero" = ""
+stripZero x = x
 
 nums :: List Chars
 nums = ("" :. " thousand " :. " million " :. " trillion " :. Nil)
 
 chooseWord :: (Num n, Ord n) => n -> Chars
-chooseWord n = (headOr "" (drop n nums))
-
-
+chooseWord n =
+  let x = (headOr "" (drop n illion))
+  in if x == "" then "" else " " ++ x ++ " "
 
 displaySingleDigit :: List Char -> Digit -> (List Char, Bool)
 displaySingleDigit _ Zero = ("", True)
@@ -150,14 +150,15 @@ displaySingleDigit word ch = (showDigit ch ++ word, True)
 -- >>> dollars "124345.67"
 -- >>> dollars "100.67"
 -- >>> dollars "1.67"
--- >>> dollars "0.67"
+-- >>> dollars "0.90"
 -- "twelve thousand three hundred and forty-five dollars and sixty-seven cents"
 wordify :: List Char -> Int -> Optional (Chars, Bool)
 wordify (ones :. tens :. hundreds :. rest) d = do
   (pHundreds, _) <- (displaySingleDigit " hundred ") <$> (fromChar hundreds)
   (pTensOnes, _) <- wordify (ones :. tens :. Nil) d
   (pRest, _) <- wordify rest (d+1)
-  Full ((pRest ++ pHundreds ++ pTensOnes), True)
+  let andW = if pHundreds == "" || pTensOnes == "" then "" else "and "
+  Full ((pRest ++ pHundreds ++ andW ++ pTensOnes), True)
 -- "eighty-one" or "seventeen"
 wordify (ones :. tens :.  _) d = do
   pTens <- fromChar tens
@@ -165,7 +166,10 @@ wordify (ones :. tens :.  _) d = do
   case pTens of
     Zero -> wordify (ones :. Nil) d
     One -> Full $ (teens (tens:.ones:.Nil) ++ (chooseWord (d)), True)
-    _ -> Full $ (((showTens pTens ) ++ "-" ++ (showDigit pOnes) ++ (chooseWord (d))), True)
+    _ ->
+      let onesS = (stripZero (showDigit pOnes))
+          sep = if onesS == "" then "" else "-"
+      in Full $ (((showTens pTens ) ++ sep ++ onesS ++ (chooseWord (d))), True)
 wordify (ones :. Nil) d = displaySingleDigit (chooseWord d) <$> fromChar ones
 wordify _ _ = Full ("", True)
 
