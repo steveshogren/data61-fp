@@ -72,12 +72,6 @@ showDigit Eight = "eight"
 showDigit Nine = "nine"
 
 -- A data type representing one, two or three digits, which may be useful for grouping.
-data Digit3 =
-  D1 Digit
-  | D2 Digit Digit
-  | D3 Digit Digit Digit
-  deriving Eq
-
 -- Possibly convert a character to a digit.
 fromChar :: Char -> Optional Digit
 fromChar '0' = Full Zero
@@ -133,6 +127,13 @@ stripZero :: Chars -> Chars
 stripZero "zero" = ""
 stripZero x = x
 
+
+data Digit3 =
+  D1 Digit
+  | D2 Digit Digit
+  | D3 Digit Digit Digit
+  deriving Eq
+
 nums :: List Chars
 nums = ("" :. " thousand " :. " million " :. " trillion " :. Nil)
 
@@ -152,35 +153,24 @@ displaySingleDigit word ch = (showDigit ch ++ word, True)
 -- >>> dollars "1.67"
 -- >>> dollars "0.90"
 -- "twelve thousand three hundred and forty-five dollars and sixty-seven cents"
-wordify :: List Char -> Int -> Optional (Chars, Bool)
+wordify :: List Char -> Int -> Optional Digit3
 wordify (ones :. tens :. hundreds :. rest) d = do
-  (pHundreds, _) <- (displaySingleDigit " hundred ") <$> (fromChar hundreds)
-  (pTensOnes, _) <- wordify (ones :. tens :. Nil) d
-  (pRest, _) <- wordify rest (d+1)
-  let andW = if pHundreds == "" || pTensOnes == "" then "" else "and "
-  Full ((pRest ++ pHundreds ++ andW ++ pTensOnes), True)
--- "eighty-one" or "seventeen"
-wordify (ones :. tens :.  _) d = do
-  pTens <- fromChar tens
-  pOnes <- fromChar ones
-  case pTens of
-    Zero -> wordify (ones :. Nil) d
-    One -> Full $ (teens (tens:.ones:.Nil) ++ (chooseWord (d)), True)
-    _ ->
-      let onesS = (stripZero (showDigit pOnes))
-          sep = if onesS == "" then "" else "-"
-      in Full $ (((showTens pTens ) ++ sep ++ onesS ++ (chooseWord (d))), True)
-wordify (ones :. Nil) d = displaySingleDigit (chooseWord d) <$> fromChar ones
-wordify _ _ = Full ("", True)
+  oP <- fromChar ones
+  tP <- fromChar tens
+  hP <- fromChar hundreds
+  return $ D3 oP tP hP
+wordify (ones :. tens :.  _) d = error ""
+wordify (ones :. Nil) d = error ""
+wordify _ _ = error ""
 
-doCents :: Chars -> Optional (Chars, Bool)
+doCents :: Chars -> Optional Digit3
 doCents (t :. h :. _) = wordify (h :. t :. Nil) 0
 doCents (t :. Nil) = wordify ('0' :. t :. Nil) 0
-doCents (Nil) = Full ("zero", True)
+doCents (Nil) = error ""
 
 -- >>> dollars "134.02"
-doDollars :: Chars -> Optional (Chars, Bool)
-doDollars "0" = Full ("zero", True)
+doDollars :: Chars -> Optional Digit3
+doDollars "0" = error ""
 doDollars hs = wordify (reverse hs) 0
 
 removeNonDigit :: List Char -> List Char
@@ -196,10 +186,12 @@ dollars i =
   let input = removeNonDigit i
       (whole, frac) = break (== '.') input
       x = map fromChar whole
-      (cents, pluralc) = doCents (removeExtraDots frac) ?? ("zero", True)
+      (cents, pluralc) = error ""
+      -- (cents, pluralc) = doCents (removeExtraDots frac) ?? ("zero", True)
       realCents = if cents == "" then "zero" else cents
       centName = if pluralc then " cents" else " cent"
-      (dolls, plurald) = doDollars whole ?? ("zero", True)
+      (dolls, plurald) = error ""
+      -- (dolls, plurald) = doDollars whole ?? ("zero", True)
       realDollars = if dolls == "" then "zero" else dolls
       dollarsName = if plurald then " dollars" else " dollar"
   in (trim realDollars) ++  dollarsName ++ " and " ++ (trim realCents) ++ centName
