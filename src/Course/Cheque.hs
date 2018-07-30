@@ -127,15 +127,11 @@ stripZero :: Chars -> Chars
 stripZero "zero" = ""
 stripZero x = x
 
-
 data Digit3 =
   D1 Digit
   | D2 Digit Digit
   | D3 Digit Digit Digit
   deriving Eq
-
-nums :: List Chars
-nums = ("" :. " thousand " :. " million " :. " trillion " :. Nil)
 
 chooseWord :: (Num n, Ord n) => n -> Chars
 chooseWord n =
@@ -149,29 +145,36 @@ displaySingleDigit word ch = (showDigit ch ++ word, True)
 
 -- >>> dollars "543813324345.67"
 -- >>> dollars "124345.67"
--- >>> dollars "100.67"
+-- >>> dollars "100"
 -- >>> dollars "1.67"
 -- >>> dollars "0.90"
 -- "twelve thousand three hundred and forty-five dollars and sixty-seven cents"
-wordify :: List Char -> Int -> Optional Digit3
+wordify :: List Char -> Int -> Optional (List Digit3)
 wordify (ones :. tens :. hundreds :. rest) d = do
   oP <- fromChar ones
   tP <- fromChar tens
   hP <- fromChar hundreds
-  return $ D3 oP tP hP
-wordify (ones :. tens :.  _) d = error ""
-wordify (ones :. Nil) d = error ""
+  ((++) ((D3 oP tP hP) :. Nil)) <$> wordify rest (d+1)
+wordify (ones :. tens :.  _) d = do
+  oP <- fromChar ones
+  tP <- fromChar tens
+  return (D2 oP tP :. Nil)
+wordify (ones :. Nil) d = do
+  oP <- fromChar ones
+  return (D1 oP :. Nil)
 wordify _ _ = error ""
 
 doCents :: Chars -> Optional Digit3
-doCents (t :. h :. _) = wordify (h :. t :. Nil) 0
-doCents (t :. Nil) = wordify ('0' :. t :. Nil) 0
+doCents (t :. h :. _) = error ""
+doCents (t :. Nil) = error ""
 doCents (Nil) = error ""
 
 -- >>> dollars "134.02"
 doDollars :: Chars -> Optional Digit3
 doDollars "0" = error ""
-doDollars hs = wordify (reverse hs) 0
+doDollars hs =
+  error ""
+  --wordify (reverse hs) 0
 
 removeNonDigit :: List Char -> List Char
 removeNonDigit = filter (\x -> isDigit x || (x=='.'))
