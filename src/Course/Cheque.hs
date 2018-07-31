@@ -98,18 +98,17 @@ toInt Seven = 7
 toInt Eight = 8
 toInt Nine = 9
 
-teens :: Chars -> Chars
-teens "10" = "ten"
-teens "11" = "eleven"
-teens "12" = "twelve"
-teens "13" = "thirteen"
-teens "14" = "fourteen"
-teens "15" = "fifteen"
-teens "16" = "sixteen"
-teens "17" = "seventeen"
-teens "18" = "eighteen"
-teens "19" = "nineteen"
-teens _  = ""
+teens :: Digit -> Chars
+teens Zero  = "ten"
+teens One   = "eleven"
+teens Two   = "twelve"
+teens Three = "thirteen"
+teens Four  = "fourteen"
+teens Five  = "fifteen"
+teens Six   = "sixteen"
+teens Seven = "seventeen"
+teens Eight = "eighteen"
+teens Nine  = "nineteen"
 
 showTens :: Digit -> Chars
 showTens Zero   = ""
@@ -128,9 +127,9 @@ stripZero "zero" = ""
 stripZero x = x
 
 data Digit3 =
-  D1 Digit
-  | D2 Digit Digit
-  | D3 Digit Digit Digit
+  D1 Digit Int
+  | D2 Digit Digit Int
+  | D3 Digit Digit Digit Int
   deriving Eq
 
 chooseWord :: (Num n, Ord n) => n -> Chars
@@ -143,38 +142,47 @@ displaySingleDigit _ Zero = ("", True)
 displaySingleDigit word One = (showDigit One ++ word, False)
 displaySingleDigit word ch = (showDigit ch ++ word, True)
 
--- >>> dollars "543813324345.67"
--- >>> dollars "124345.67"
--- >>> dollars "100"
--- >>> dollars "1.67"
--- >>> dollars "0.90"
--- "twelve thousand three hundred and forty-five dollars and sixty-seven cents"
 wordify :: List Char -> Int -> Optional (List Digit3)
 wordify (ones :. tens :. hundreds :. rest) d = do
   oP <- fromChar ones
   tP <- fromChar tens
   hP <- fromChar hundreds
-  ((++) ((D3 oP tP hP) :. Nil)) <$> wordify rest (d+1)
+  (flip (++) ((D3 hP tP oP d) :. Nil)) <$> wordify rest (d+1)
 wordify (ones :. tens :.  _) d = do
   oP <- fromChar ones
   tP <- fromChar tens
-  return (D2 oP tP :. Nil)
+  return (D2 tP oP d :. Nil)
 wordify (ones :. Nil) d = do
   oP <- fromChar ones
-  return (D1 oP :. Nil)
-wordify _ _ = error ""
+  return (D1 oP d :. Nil)
+wordify Nil _ = Full Nil
 
-doCents :: Chars -> Optional Digit3
-doCents (t :. h :. _) = error ""
-doCents (t :. Nil) = error ""
-doCents (Nil) = error ""
+-- >>> doDollars "1234"
+printDollars :: Digit3 -> Chars
+printDollars (D1 ones d) = showDigit ones ++ chooseWord d
+printDollars (D2 One ones d) = teens ones ++ chooseWord d
+printDollars (D2 Zero Zero _) = ""
+printDollars (D2 tens Zero d) = showTens tens ++ chooseWord d
+printDollars (D2 Zero ones d) = printDollars (D1 ones d)
+printDollars (D2 tens ones d) = showTens tens ++ "-" ++ printDollars (D1 ones d)
+printDollars (D3 Zero Zero Zero _) = ""
+printDollars (D3 Zero tens ones d) =  printDollars (D2 tens ones d)
+printDollars (D3 hundreds Zero Zero d) = showDigit hundreds ++ " hundred" ++ chooseWord d
+printDollars (D3 hundreds tens ones d) = showDigit hundreds ++ " hundred and " ++ printDollars (D2 tens ones d)
 
--- >>> dollars "134.02"
-doDollars :: Chars -> Optional Digit3
-doDollars "0" = error ""
+-- >>> doDollars "1211560"
+doDollars :: Chars -> Optional Chars
 doDollars hs =
-  error ""
-  --wordify (reverse hs) 0
+  let ds = wordify (reverse hs) 0
+  in (\s ->
+        let result = flatMap printDollars s
+        in if result == "" then "zero" else result) <$> ds
+
+-- >>> doCents "1"
+doCents :: Chars -> Optional Chars
+doCents (tens :. Nil) = doDollars (tens :. '0' :. Nil)
+doCents (tens :. ones :. _) = doDollars (tens :. ones :. Nil)
+doCents _ = Empty
 
 removeNonDigit :: List Char -> List Char
 removeNonDigit = filter (\x -> isDigit x || (x=='.'))
@@ -183,92 +191,15 @@ removeExtraDots :: List Char -> List Char
 removeExtraDots = filter isDigit
 
 -- >>> dollars "9abc9def9ghi.jkl9mno"
--- >>> dollars "1.02"
+-- >>> dollars "12020.6130"
 dollars :: Chars -> Chars
 dollars i =
   let input = removeNonDigit i
       (whole, frac) = break (== '.') input
       x = map fromChar whole
-      (cents, pluralc) = error ""
-      -- (cents, pluralc) = doCents (removeExtraDots frac) ?? ("zero", True)
-      realCents = if cents == "" then "zero" else cents
-      centName = if pluralc then " cents" else " cent"
-      (dolls, plurald) = error ""
-      -- (dolls, plurald) = doDollars whole ?? ("zero", True)
-      realDollars = if dolls == "" then "zero" else dolls
-      dollarsName = if plurald then " dollars" else " dollar"
-  in (trim realDollars) ++  dollarsName ++ " and " ++ (trim realCents) ++ centName
+      cents = doCents (removeExtraDots frac) ?? "zero"
+      centsName = if cents == "one" then " cent" else " cents"
+      dolls = doDollars whole ?? "zero"
+      dollarsName = if dolls == "one" then " dollar" else " dollars"
+  in (trim dolls) ++  dollarsName ++ " and " ++ (trim cents) ++ centsName
 
--- | Take a numeric value and produce its English output.
---
--- >>> dollars "0"
--- "zero dollars and zero cents"
---
--- >>> dollars "1"
--- "one dollar and zero cents"
---
--- >>> dollars "0.1"
--- "zero dollars and ten cents"
---
--- >>> dollars "1."
--- "one dollar and zero cents"
---
--- >>> dollars "0."
--- "zero dollars and zero cents"
---
--- >>> dollars "0.0"
--- "zero dollars and zero cents"
---
--- >>> dollars ".34"
--- "zero dollars and thirty-four cents"
---
--- >>> dollars "0.3456789"
--- "zero dollars and thirty-four cents"
---
--- >>> dollars "1.0"
--- "one dollar and zero cents"
---
--- >>> dollars "1.01"
--- "one dollar and one cent"
---
--- >>> dollars "a1a"
--- "one dollar and zero cents"
---
--- >>> dollars "a1a.a0.7b"
--- "one dollar and seven cents"
---
--- >>> dollars "100"
--- "one hundred dollars and zero cents"
---
--- >>> dollars "100.0"
--- "one hundred dollars and zero cents"
---
--- >>> dollars "100.00"
--- "one hundred dollars and zero cents"
---
--- >>> dollars "100.00000"
--- "one hundred dollars and zero cents"
---
--- >>> dollars "1000456.13"
--- "one million four hundred and fifty-six dollars and thirteen cents"
---
--- >>> dollars "1001456.13"
--- "one million one thousand four hundred and fifty-six dollars and thirteen cents"
---
--- >>> dollars "16000000456.13"
--- "sixteen billion four hundred and fifty-six dollars and thirteen cents"
---
--- >>> dollars "100.45"
--- "one hundred dollars and forty-five cents"
---
--- >>> dollars "100.07"
--- "one hundred dollars and seven cents"
---
--- >>> dollars "9abc9def9ghi.jkl9mno"
--- "nine hundred and ninety-nine dollars and ninety cents"
---
--- >>> dollars "12345.67"
--- "twelve thousand three hundred and forty-five dollars and sixty-seven cents"
---
--- >>> dollars "456789123456789012345678901234567890123456789012345678901234567890.12"
--- "four hundred and fifty-six vigintillion seven hundred and eighty-nine novemdecillion one hundred and twenty-three octodecillion four hundred and fifty-six septendecillion seven hundred and eighty-nine sexdecillion twelve quindecillion three hundred and forty-five quattuordecillion six hundred and seventy-eight tredecillion nine hundred and one duodecillion two hundred and thirty-four undecillion five hundred and sixty-seven decillion eight hundred and ninety nonillion one hundred and twenty-three octillion four hundred and fifty-six septillion seven hundred and eighty-nine sextillion twelve quintillion three hundred and forty-five quadrillion six hundred and seventy-eight trillion nine hundred and one billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety dollars and twelve cents"
